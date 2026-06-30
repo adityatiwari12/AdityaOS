@@ -293,44 +293,62 @@ const NotesApp = ({ isOpen, onClose, section }: NotesAppProps) => {
     };
 
     const renderSkills = () => {
-        // Build a simple frequency map of how many projects use each skill
-        const freq: Record<string, number> = {};
-        for (const p of (userConfig.projects || [])) {
-            for (const t of p.techStack) {
-                freq[t] = (freq[t] || 0) + 1;
-            }
-        }
-        const max = Object.values(freq).reduce((a, b) => Math.max(a, b), 1);
-        const getIntensity = (skill: string) => {
-            const f = freq[skill] || 0;
-            const ratio = Math.min(1, f / max);
-            // Interpolate from gray-700 to green-600
-            const base = 'bg-gray-700';
-            if (ratio > 0.66) return 'bg-green-600/70';
-            if (ratio > 0.33) return 'bg-green-600/40';
-            if (ratio > 0) return 'bg-green-600/20';
-            return base;
+        const EXPERT = new Set([
+            'Python', 'TypeScript', 'JavaScript', 'React.js', 'Node.js', 'SQL',
+            'Git', 'LLMs', 'RAG', 'Prompt Engineering',
+        ]);
+        const ADVANCED = new Set([
+            'Next.js', 'FastAPI', 'Express.js', 'PostgreSQL', 'MongoDB', 'Docker',
+            'Machine Learning', 'Deep Learning', 'React Native', 'OCR',
+            'Named Entity Recognition', 'CI/CD', 'Computer Vision', 'Firebase', 'Linux',
+            'Java',
+        ]);
+        // Everything else → Intermediate
+
+        const getTier = (skill: string): 'Expert' | 'Advanced' | 'Intermediate' => {
+            if (EXPERT.has(skill)) return 'Expert';
+            if (ADVANCED.has(skill)) return 'Advanced';
+            return 'Intermediate';
         };
+
+        const tierStyle: Record<string, string> = {
+            Expert: 'bg-green-600/70 hover:bg-green-500/80',
+            Advanced: 'bg-blue-600/50 hover:bg-blue-500/70',
+            Intermediate: 'bg-gray-700/80 hover:bg-gray-600/80',
+        };
+        const tierLabel: Record<string, string> = {
+            Expert: '★★★',
+            Advanced: '★★',
+            Intermediate: '★',
+        };
+
+        const grouped: Record<string, string[]> = {
+            Expert: skills.filter((s) => getTier(s) === 'Expert'),
+            Advanced: skills.filter((s) => getTier(s) === 'Advanced'),
+            Intermediate: skills.filter((s) => getTier(s) === 'Intermediate'),
+        };
+
         return (
             <div className="space-y-6">
                 {renderBackButton()}
                 <h2 className="text-2xl font-bold text-gray-200 mb-2">Skills</h2>
-                <p className="text-sm text-gray-400 mb-4">Intensity shows how often a skill appears across my projects.</p>
-                <div className="bg-gray-800/50 p-6 rounded-xl shadow-lg">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                        {skills.map((skill, index) => (
-                            <button
-                                key={index}
-                                className={`px-3 py-2 rounded text-sm text-gray-100 text-left transition-colors ${getIntensity(skill)} hover:bg-green-500/60`}
-                                title={`Used in ${freq[skill] || 0} project(s)`}
-                                onClick={() => {/* future: filter projects by skill */}}
-                            >
-                                <span className="font-medium">{skill}</span>
-                                <span className="ml-2 text-xs text-gray-200/70">{freq[skill] || 0}</span>
-                            </button>
-                        ))}
+                <p className="text-sm text-gray-400 mb-4">★★★ Expert · ★★ Advanced · ★ Intermediate</p>
+                {(['Expert', 'Advanced', 'Intermediate'] as const).map((tier) => (
+                    <div key={tier} className="bg-gray-800/50 p-4 rounded-xl shadow-lg">
+                        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">{tier}</h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                            {grouped[tier].map((skill, index) => (
+                                <div
+                                    key={index}
+                                    className={`px-3 py-2 rounded-lg text-sm text-gray-100 flex items-center justify-between transition-colors ${tierStyle[tier]}`}
+                                >
+                                    <span className="font-medium truncate">{skill}</span>
+                                    <span className="ml-2 text-[10px] text-gray-200/50 shrink-0">{tierLabel[tier]}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                ))}
             </div>
         );
     };
