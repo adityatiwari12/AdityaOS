@@ -1,8 +1,8 @@
 import { useRef, useState, useCallback } from 'react';
 import {
-  BsGithub, BsLinkedin, BsPlayCircleFill, BsGraphUp, BsCalendar,
+  BsLinkedin, BsPlayCircleFill, BsGraphUp, BsCalendar,
   BsStickyFill, BsFilePdf, BsRocket, BsImages, BsJournalRichtext,
-  BsFolder2, BsInstagram,
+  BsFolder2, BsInstagram, BsCameraFill,
 } from 'react-icons/bs';
 import { RiTerminalFill } from 'react-icons/ri';
 import { userConfig } from '../../config/index';
@@ -57,7 +57,7 @@ export default function MobileDock(props: MobileDockProps) {
     { id: 'notes',         label: 'Notes',     icon: BsStickyFill,      color: 'from-yellow-500 to-yellow-300',   onOpen: props.onNotesClick },
     { id: 'contributions', label: 'Activity',  icon: BsGraphUp,         color: 'from-cyan-600 to-cyan-400',       onOpen: props.onContributionsClick },
     { id: 'collaboration', label: 'Meet',      icon: BsCalendar,        color: 'from-blue-600 to-blue-400',       onOpen: props.onCalendarClick },
-    { id: 'github',        label: 'Projects',  icon: BsGithub,          color: 'from-gray-800 to-gray-600',       onOpen: () => open('github', 'Projects') },
+    { id: 'camera',        label: 'Camera',    icon: BsCameraFill,      color: 'from-zinc-700 to-zinc-500',       onOpen: () => open('camera', 'Camera') },
     { id: 'founder-hq',   label: 'Founder',   icon: BsRocket,          color: 'from-orange-600 to-orange-400',   onOpen: () => open('founder-hq', 'Founder HQ') },
     { id: 'resume',        label: 'Resume',    icon: BsFilePdf,         color: 'from-red-600 to-red-400',         onOpen: () => open('resume', 'Resume') },
     { id: 'research-center', label: 'Research', icon: BsJournalRichtext, color: 'from-indigo-600 to-indigo-400', onOpen: () => open('research-center', 'Research Center') },

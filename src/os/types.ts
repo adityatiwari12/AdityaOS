@@ -22,7 +22,8 @@ export type AppId =
   | 'collaboration'
   | 'photos'
   | 'architecture-viewer'
-  | 'hackathon-rush';
+  | 'hackathon-rush'
+  | 'camera';
 
 export interface WindowPayload {
   section?: string;
