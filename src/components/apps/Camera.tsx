@@ -72,14 +72,8 @@ export default function Camera() {
 
   useEffect(() => {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
     img.onload = () => { logoRef.current = img; };
-    img.onerror = () => {
-      const fallback = new Image();
-      fallback.onload = () => { logoRef.current = fallback; };
-      fallback.src = '/appicon.png';
-    };
-    img.src = 'https://github.com/adityatiwari12.png';
+    img.src = '/images/profile/aditya.png';
   }, []);
 
   const stopStream = useCallback(() => {
@@ -193,7 +187,7 @@ export default function Camera() {
       {/* Brand watermark badge */}
       {!error && !photo && (
         <div className="absolute bottom-3 right-3 flex items-center gap-1.5 pl-1.5 pr-2.5 py-1.5 rounded-full bg-black/45 backdrop-blur-sm pointer-events-none select-none">
-          <img src="https://github.com/adityatiwari12.png" alt="" className="w-6 h-6 rounded-lg object-cover" />
+          <img src="/images/profile/aditya.png" alt="" className="w-6 h-6 rounded-lg object-cover" />
           <div className="leading-tight">
             <p className="text-white text-[11px] font-semibold">AdityaOS</p>
             <p className="text-white/70 text-[9px]">adityatiwari.work</p>
