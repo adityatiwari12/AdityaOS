@@ -59,7 +59,7 @@ function defaultPosition(appId: AppId, index: number) {
     contributions: { x: cascadeX, y: 80 },
     videos: { x: cascadeX + 46, y: 126 },
     intro: { x: cascadeX + 92, y: 172 },
-    terminal: { x: w * 0.1, y: 80 },
+    terminal: { x: Math.round((w - size.width) / 2), y: Math.round((h - TOP_INSET - BOTTOM_RESERVE - size.height) / 2) + TOP_INSET },
     notes: { x: w * 0.25, y: 100 },
     github: { x: w * 0.15, y: 120 },
     resume: { x: w * 0.35, y: 100 },
