@@ -26,6 +26,84 @@ function PhotosLogo({ size = 34 }: { size?: number }) {
   );
 }
 
+/** Open-book glyph for Research, matching the line-icon language used elsewhere. */
+function ResearchLogo({ size = 32 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]" aria-hidden="true">
+      <defs>
+        <linearGradient id="research-grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#818CF8" />
+          <stop offset="100%" stopColor="#4F46E5" />
+        </linearGradient>
+      </defs>
+      <path d="M50 28 C42 20 28 18 16 22 V72 C28 68 42 70 50 78 C58 70 72 68 84 72 V22 C72 18 58 20 50 28 Z" fill="url(#research-grad)" stroke="#fff" strokeOpacity="0.25" strokeWidth="2" />
+      <line x1="50" y1="28" x2="50" y2="78" stroke="#fff" strokeOpacity="0.35" strokeWidth="2" />
+      <line x1="24" y1="34" x2="42" y2="31" stroke="#fff" strokeOpacity="0.6" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="24" y1="44" x2="42" y2="41" stroke="#fff" strokeOpacity="0.6" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="58" y1="31" x2="76" y2="34" stroke="#fff" strokeOpacity="0.6" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="58" y1="41" x2="76" y2="44" stroke="#fff" strokeOpacity="0.6" strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** Award-ribbon glyph for Trophies/wins. */
+function TrophyLogo({ size = 32 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]" aria-hidden="true">
+      <defs>
+        <linearGradient id="trophy-grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#FCD34D" />
+          <stop offset="100%" stopColor="#D97706" />
+        </linearGradient>
+      </defs>
+      <path d="M32 16h36v26c0 11 -8 19 -18 19s-18 -8 -18 -19z" fill="url(#trophy-grad)" stroke="#fff" strokeOpacity="0.3" strokeWidth="2" />
+      <path d="M32 22c-9 0 -14 5 -14 12s5 12 13 13" fill="none" stroke="url(#trophy-grad)" strokeWidth="5" strokeLinecap="round" />
+      <path d="M68 22c9 0 14 5 14 12s-5 12 -13 13" fill="none" stroke="url(#trophy-grad)" strokeWidth="5" strokeLinecap="round" />
+      <rect x="46" y="58" width="8" height="14" fill="#D97706" />
+      <path d="M30 80c0 -6 9 -10 20 -10s20 4 20 10z" fill="#D97706" />
+      <circle cx="50" cy="33" r="7" fill="#fff" fillOpacity="0.5" />
+    </svg>
+  );
+}
+
+/** Folder-of-code glyph for Projects. */
+function ProjectsLogo({ size = 32 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]" aria-hidden="true">
+      <defs>
+        <linearGradient id="projects-grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#60A5FA" />
+          <stop offset="100%" stopColor="#2563EB" />
+        </linearGradient>
+      </defs>
+      <path d="M14 30c0-3 2-5 5-5h17l7 8h38c3 0 5 2 5 5v38c0 3-2 5-5 5H19c-3 0-5-2-5-5z" fill="url(#projects-grad)" stroke="#fff" strokeOpacity="0.25" strokeWidth="2" />
+      <path d="M40 48l-8 8 8 8" fill="none" stroke="#fff" strokeOpacity="0.85" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M60 48l8 8-8 8" fill="none" stroke="#fff" strokeOpacity="0.85" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="54" y1="46" x2="46" y2="66" stroke="#fff" strokeOpacity="0.6" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** Fountain-pen-on-page glyph for Blog. */
+function BlogLogo({ size = 32 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]" aria-hidden="true">
+      <defs>
+        <linearGradient id="blog-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#5EEAD4" />
+          <stop offset="100%" stopColor="#0D9488" />
+        </linearGradient>
+      </defs>
+      <rect x="20" y="14" width="48" height="62" rx="5" fill="#fff" fillOpacity="0.12" stroke="#fff" strokeOpacity="0.3" strokeWidth="2" />
+      <line x1="29" y1="30" x2="55" y2="30" stroke="#fff" strokeOpacity="0.55" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="29" y1="40" x2="59" y2="40" stroke="#fff" strokeOpacity="0.4" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="29" y1="50" x2="48" y2="50" stroke="#fff" strokeOpacity="0.4" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M48 72 L76 44 L86 54 L58 82 L46 84 Z" fill="url(#blog-grad)" stroke="#fff" strokeOpacity="0.3" strokeWidth="2" strokeLinejoin="round" />
+      <line x1="71" y1="49" x2="81" y2="59" stroke="#0F766E" strokeWidth="2" />
+    </svg>
+  );
+}
+
 interface DesktopObjectProps {
   emoji?: string;
   icon?: React.ReactNode;
@@ -85,20 +163,20 @@ export default function DesktopObjects() {
     <div className="hidden xl:flex flex-col items-center gap-5 fixed top-20 right-6 z-[4] pointer-events-none" aria-label="Desktop">
       {/* Right-aligned vertical icon column, macOS desktop style */}
       <DesktopObject
-        emoji="📚" label="Research" hint="Open Research Papers" index={0} reduced={reduced}
+        icon={<ResearchLogo />} label="Research" hint="Open Research Papers" index={0} reduced={reduced}
         onActivate={() => openWindow('research-center', 'Research Center')}
       />
       <DesktopObject
-        emoji="🏆" label="Trophies" hint="Open hackathon wins & awards" index={1} reduced={reduced}
+        icon={<TrophyLogo />} label="Trophies" hint="Open hackathon wins & awards" index={1} reduced={reduced}
         onActivate={() => openWindow('notes', 'Notes', { section: 'competitions' })}
       />
       <DesktopObject
-        emoji="💻" label="Projects" hint="Double-click to open Projects" index={2} reduced={reduced}
+        icon={<ProjectsLogo />} label="Projects" hint="Double-click to open Projects" index={2} reduced={reduced}
         doubleClick
         onActivate={() => openWindow('github', 'Projects')}
       />
       <DesktopObject
-        emoji="✍️" label="Blog" hint="Read my Medium article" index={3} reduced={reduced}
+        icon={<BlogLogo />} label="Blog" hint="Read my Medium article" index={3} reduced={reduced}
         onActivate={() => window.open('https://medium.com/@tiwariaditya005/when-machines-learned-to-remember-5769d86c1b49', '_blank', 'noopener,noreferrer')}
       />
       <DesktopObject
