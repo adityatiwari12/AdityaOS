@@ -662,12 +662,12 @@ function drawSplash(ctx: CanvasRenderingContext2D, best: number, charImg: HTMLIm
     ctx.drawImage(charImg, CW / 2 - 32, CH / 2 - 12 + bob, 64, 64);
   }
 
-  // Press space
+  // Tap to start
   const blink = Math.sin(t * 0.005) > 0;
   if (blink) {
     ctx.fillStyle = '#e2e8f0';
     ctx.font = 'bold 18px monospace';
-    ctx.fillText('PRESS SPACE TO START', CW / 2, CH / 2 + 90);
+    ctx.fillText('TAP ANYWHERE OR PRESS ENTER', CW / 2, CH / 2 + 90);
   }
 
   // Best
@@ -683,7 +683,7 @@ function drawSplash(ctx: CanvasRenderingContext2D, best: number, charImg: HTMLIm
   ctx.fillStyle = 'rgba(200,200,200,0.5)';
   ctx.font = '12px monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('SPACE: jump   ↓: duck   P: pause   R: restart', CW / 2, CH - 20);
+  ctx.fillText('ENTER / TAP: start · SPACE: jump   ↓: duck   P: pause', CW / 2, CH - 20);
   ctx.textAlign = 'left';
 }
 
@@ -712,7 +712,7 @@ function drawGameOver(ctx: CanvasRenderingContext2D, commits: number, best: numb
   if (Math.sin(t * 0.006) > 0) {
     ctx.fillStyle = '#a78bfa';
     ctx.font = 'bold 18px monospace';
-    ctx.fillText('PRESS R TO RESTART', CW / 2, CH / 2 + 60);
+    ctx.fillText('TAP ANYWHERE OR PRESS ENTER', CW / 2, CH / 2 + 60);
   }
 
   ctx.textAlign = 'left';
@@ -1293,14 +1293,15 @@ class GameEngine {
       return;
     }
 
-    if (code === 'KeyR' && down && this.state === 'gameover') {
-      this.restart();
+    if (down && (code === 'Enter' || code === 'NumpadEnter')) {
+      if (this.state === 'splash' || this.state === 'gameover') {
+        this.handleTap();
+      }
       return;
     }
 
     if (code === 'Space') {
       if (down) {
-        if (this.state === 'splash') { this.start(); return; }
         if (this.state === 'playing') {
           if (p.grounded && !p.ducking) {
             p.vy = JUMP_FORCE;
@@ -1327,6 +1328,37 @@ class GameEngine {
   start() {
     this.state = 'playing';
     this.sound.startMusic();
+  }
+
+  /** Tap / click anywhere — start from splash or restart after game over. */
+  handleTap() {
+    if (this.state === 'splash') this.start();
+    else if (this.state === 'gameover') this.restart();
+  }
+
+  /** Pointer down — menu taps, or jump while playing (touch + mouse). */
+  handlePointerDown() {
+    if (this.state === 'splash' || this.state === 'gameover') {
+      this.handleTap();
+      return;
+    }
+    if (this.state !== 'playing') return;
+    const p = this.player;
+    if (p.grounded && !p.ducking) {
+      p.vy = JUMP_FORCE;
+      p.grounded = false;
+      p.jumping = true;
+      p.jumpHeld = true;
+      p.jumpHeldFrames = 0;
+      this.sound.jump();
+    } else if (!p.grounded) {
+      p.jumpHeld = true;
+    }
+  }
+
+  handlePointerUp() {
+    this.player.jumpHeld = false;
+    this.player.ducking = false;
   }
 
   private restart() {
@@ -1454,7 +1486,7 @@ export default function HackathonRush({ windowId: _windowId, onClose: _onClose }
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (!engineRef.current) return;
-      if (['Space', 'ArrowDown', 'KeyP', 'KeyR'].includes(e.code)) {
+      if (['Space', 'ArrowDown', 'KeyP', 'Enter', 'NumpadEnter'].includes(e.code)) {
         e.preventDefault();
         engineRef.current.handleKey(e.code, e.type === 'keydown');
       }
@@ -1482,21 +1514,26 @@ export default function HackathonRush({ windowId: _windowId, onClose: _onClose }
         <canvas
           ref={canvasRef}
           className="w-full h-full"
-          style={{ imageRendering: 'pixelated', display: 'block', transform: 'translateZ(0)', willChange: 'transform', touchAction: 'none' }}
-          onTouchStart={(e) => {
+          style={{ imageRendering: 'pixelated', display: 'block', transform: 'translateZ(0)', willChange: 'transform', touchAction: 'none', cursor: 'pointer' }}
+          onPointerDown={(e) => {
             e.preventDefault();
-            touchStartY.current = e.touches[0].clientY;
             setShowTouchHint(false);
-            engineRef.current?.handleKey('Space', true);
+            touchStartY.current = e.clientY;
+            engineRef.current?.handlePointerDown();
           }}
-          onTouchMove={(e) => {
+          onPointerMove={(e) => {
+            if (e.buttons === 0) return;
             e.preventDefault();
-            const dy = e.touches[0].clientY - touchStartY.current;
+            const dy = e.clientY - touchStartY.current;
             if (dy > 30) engineRef.current?.handleKey('ArrowDown', true);
           }}
-          onTouchEnd={(e) => {
+          onPointerUp={(e) => {
             e.preventDefault();
-            engineRef.current?.handleKey('Space', false);
+            engineRef.current?.handlePointerUp();
+            engineRef.current?.handleKey('ArrowDown', false);
+          }}
+          onPointerLeave={(e) => {
+            engineRef.current?.handlePointerUp();
             engineRef.current?.handleKey('ArrowDown', false);
           }}
         />
@@ -1504,7 +1541,7 @@ export default function HackathonRush({ windowId: _windowId, onClose: _onClose }
         {isMobile && showTouchHint && (
           <div className="absolute bottom-6 left-0 right-0 flex justify-center pointer-events-none">
             <div className="px-4 py-2 rounded-full text-xs text-white/70 font-mono whitespace-nowrap" style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(255,255,255,0.12)' }}>
-              Tap · Hold = high jump · ↓ = duck
+              Tap anywhere or Enter to start · Hold = high jump · ↓ = duck
             </div>
           </div>
         )}
