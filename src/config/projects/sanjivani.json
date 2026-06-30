@@ -1,0 +1,72 @@
+{
+    "id": "sanjivani",
+    "title": "Sanjivani — AI-Powered Medication Safety & Health Monitoring",
+    "description": "A unified medication-safety platform: scan medicine strips via on-device OCR, auto-extract dosage and expiry, and check harmful drug interactions using RxNorm datasets with real-time safety alerts. Includes an ESP32 IoT wearable streaming heart rate, SpO2, and temperature, plus an always-on emergency Health Resume accessible via QR code. Won $1,000+ across multiple hackathons.",
+    "longDescription": "Sanjivani is an AI-powered medication safety and health monitoring platform designed to help individuals, especially elderly patients and people taking multiple medications, manage their healthcare safely and independently. The platform combines intelligent medicine management, real-time health monitoring, and emergency response into a single ecosystem.\n\nUsers can scan medicine strips or bottles using on-device OCR, which automatically extracts the medicine name, dosage, and expiry date. The system standardizes medicines using RxNorm and checks for harmful drug interactions using trusted medical datasets, providing clear safety alerts before medication is taken. It also generates personalized medication schedules, sends smart reminders with medicine images for easy identification, and tracks medicine expiry to reduce medication errors.\n\nBeyond medication management, Sanjivani creates a comprehensive Health Resume by combining medication history, allergies, chronic conditions, and other medical information. This profile can be accessed instantly during emergencies through an always-on emergency screen and QR code, enabling healthcare professionals to quickly understand the patient's medical history. The platform also includes guardian support, allowing family members to receive emergency alerts and monitor the user's health remotely.\n\nA key innovation of Sanjivani is its IoT wearable device, built around an ESP32 microcontroller, which continuously monitors vital parameters such as heart rate, SpO2, and body temperature. The wearable streams real-time health data to the mobile application, where it is correlated with the user's medication history. By combining medication data with physiological signals, the system can detect abnormal patterns that may indicate adverse drug reactions or health deterioration and immediately notify the user and their guardians. The platform also includes menstrual cycle and hormone insights by correlating cycle information with vital signs to provide personalized health insights.\n\nBy integrating AI, medical knowledge, wearable technology, and emergency care into one unified platform, Sanjivani serves as a continuous healthcare companion that makes medication usage safer, improves adherence, enables early detection of health risks, and ensures faster response during medical emergencies.",
+    "repoUrl": "https://github.com/adityatiwari12",
+    "techStack": [
+        "React Native",
+        "Python",
+        "FastAPI",
+        "ESP32",
+        "OCR",
+        "RxNorm",
+        "Firebase"
+    ],
+    "structure": {
+        "root": "sanjivani",
+        "children": [
+            { "name": "README.md", "type": "file" },
+            {
+                "name": "mobile",
+                "type": "directory",
+                "children": [
+                    { "name": "App.tsx", "type": "file" },
+                    {
+                        "name": "screens",
+                        "type": "directory",
+                        "children": [
+                            { "name": "ScanMedicine.tsx", "type": "file" },
+                            { "name": "HealthResume.tsx", "type": "file" },
+                            { "name": "VitalsDashboard.tsx", "type": "file" }
+                        ]
+                    },
+                    {
+                        "name": "services",
+                        "type": "directory",
+                        "children": [
+                            { "name": "ocr.ts", "type": "file" },
+                            { "name": "rxnormClient.ts", "type": "file" },
+                            { "name": "interactionCheck.ts", "type": "file" }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "backend",
+                "type": "directory",
+                "children": [
+                    { "name": "main.py", "type": "file" },
+                    { "name": "drug_interactions.py", "type": "file" },
+                    { "name": "vitals_ingest.py", "type": "file" }
+                ]
+            },
+            {
+                "name": "firmware",
+                "type": "directory",
+                "children": [
+                    { "name": "esp32_vitals.ino", "type": "file" }
+                ]
+            }
+        ]
+    },
+    "images": [
+        { "url": "/images/gallery/sanjivani/sanjivani-1.jpeg", "alt": "Sanjivani app screenshot 1", "description": "Sanjivani — medication safety & health monitoring" },
+        { "url": "/images/gallery/sanjivani/sanjivani-2.jpeg", "alt": "Sanjivani app screenshot 2", "description": "Medicine scanning & interaction checks" },
+        { "url": "/images/gallery/sanjivani/sanjivani-3.jpeg", "alt": "Sanjivani app screenshot 3", "description": "Health Resume & emergency profile" },
+        { "url": "/images/gallery/sanjivani/sanjivani-4.jpeg", "alt": "Sanjivani app screenshot 4", "description": "Vitals dashboard from the ESP32 wearable" },
+        { "url": "/images/gallery/sanjivani/sanjivani-5.jpeg", "alt": "Sanjivani app screenshot 5", "description": "Medication schedule & reminders" },
+        { "url": "/images/gallery/sanjivani/sanjivani-6.jpeg", "alt": "Sanjivani app screenshot 6", "description": "Guardian alerts & monitoring" },
+        { "url": "/images/gallery/sanjivani/sanjivani-7.jpeg", "alt": "Sanjivani app screenshot 7", "description": "Sanjivani — feature overview" }
+    ]
+}

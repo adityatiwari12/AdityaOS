@@ -1,0 +1,52 @@
+# build output
+dist/
+
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/
+
+# vscode setting folder
+.vscode/
+
+# vercel setting folder
+.vercel/
+.vercel
+
+# Raw local uploads (processed assets live in public/images/)
+pictures/
+portfolio video.mp4
+*.mp4
+!public/**/*.mp4
+
+# Private assets — kept local only, NOT published to GitHub
+# (deploys run via Vercel CLI from local files, so the live site still has these)
+# Pitch deck
+Tokenistt — Pitch Deck.pdf
+public/tokenistt-pitch-deck.pdf
+# Resume / CV
+Aditya_Tiwari_CV_Masters.pdf
+public/resume.pdf
+# Pictures
+public/images/gallery/
+public/images/profile/
+aditya-removebg-preview.png
+# Sound effects (local only)
+*.mp3

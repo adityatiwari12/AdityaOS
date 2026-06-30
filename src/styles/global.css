@@ -1,0 +1,54 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+@layer base {
+  :root {
+    /* Apple SF Pro system stack — Text for body, Display for large headings */
+    --font-text: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro',
+      'Segoe UI', 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+    --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro',
+      'Segoe UI', 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+    --font-mono: 'SF Mono', 'SFMono-Regular', 'Menlo', 'Monaco', 'Cascadia Code',
+      'Courier New', monospace;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: var(--font-text);
+    font-feature-settings: 'kern', 'liga', 'calt';
+    letter-spacing: -0.01em;
+    overflow: hidden;
+    height: 100%;
+    overscroll-behavior: none;
+  }
+
+  /* Apple display type: tight tracking on larger headings */
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.022em;
+  }
+  h1 { letter-spacing: -0.03em; }
+
+  .font-mono {
+    font-family: var(--font-mono);
+    letter-spacing: 0;
+  }
+}
+
+/* Mobile chrome sizing — overridden in landscape to reclaim vertical space */
+:root {
+  --mobile-dock-clearance: 116px;
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  :root {
+    --mobile-dock-clearance: 60px;
+  }
+}

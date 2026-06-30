@@ -1,0 +1,80 @@
+{
+    "id": "talkwithdb",
+    "title": "TalkWithDB — Enterprise Desktop AI for Databases",
+    "description": "A desktop-first product that lets you connect a database and ask questions in plain English, getting safe, SQL-backed answers with context. It pairs a retrieval-augmented SQL generation pipeline (schema-aware RAG) with read-only safety guardrails, multi-query reasoning (primary + count + diagnostic queries), and local persistence of chat history and query cache. Built for analysts, managers, and engineering leads who need fast, traceable, explainable answers.",
+    "longDescription": "TalkWithDB is a desktop-first AI database assistant designed to make structured data querying conversational, reliable, and explainable. The system allows users to interact with relational databases using plain English instead of writing SQL manually. Users can connect a PostgreSQL database, ask questions naturally, and receive validated SQL-backed answers with contextual explanations and insights in a chat-based interface.\n\nUnlike basic NL-to-SQL demos that rely purely on prompting, TalkWithDB is built as a multi-layered retrieval and execution system focused on reliability and trust. The platform uses a hybrid RAG pipeline combining BM25 keyword retrieval and vector similarity search to dynamically retrieve only the most relevant schema context before SQL generation. This reduces hallucinations and improves query accuracy, especially across larger or relationally complex schemas.\n\nThe system includes a dedicated SQL validation and guardrails layer that restricts unsafe operations, enforces read-only execution, sanitizes generated queries, blocks potentially harmful patterns, and validates schema alignment before execution. Generated SQL is executed against a live PostgreSQL database, after which the results are transformed into structured, human-readable responses rather than raw database outputs.\n\nTalkWithDB also incorporates conversation memory, local session persistence, query caching, and contextual query understanding to support iterative data exploration. The desktop application is designed around a chat-first workflow, allowing users to manage conversations, revisit previous queries, inspect generated SQL when needed, and interact with the system in a way that feels conversational rather than technical.\n\nThe project evolved through multiple architectural iterations:\n\n- initial prompt-based SQL generation prototypes\n- retrieval-augmented schema grounding\n- modular FastAPI backend pipelines\n- hybrid RAG-based retrieval systems\n- desktop conversational UX with explainable responses and guardrails\n\nCore technologies used include:\n\n- Python\n- FastAPI\n- PostgreSQL\n- Ollama / Llama 3.2\n- FAISS\n- SQLite\n- Retrieval-Augmented Generation (RAG)\n- Prompt Engineering\n- LLM Guardrails and SQL Validation Systems\n\nThe core objective behind TalkWithDB is not just generating SQL from natural language, but building a trustworthy AI system that reduces the gap between business questions and data-backed decisions while maintaining safety, explainability, and operational reliability.",
+    "repoUrl": "https://github.com/adityatiwari12/TalkwithDB",
+    "techStack": [
+        "Python",
+        "PostgreSQL",
+        "Ollama (llama3.2)",
+        "nomic-embed-text",
+        "RAG",
+        "SQLite",
+        "Docker"
+    ],
+    "structure": {
+        "root": "TalkwithDB",
+        "children": [
+            { "name": ".gitignore", "type": "file" },
+            { "name": "README.md", "type": "file" },
+            { "name": "main.py", "type": "file" },
+            { "name": "chat_optimized.py", "type": "file" },
+            { "name": "chat_ui_enhanced.py", "type": "file" },
+            { "name": "chat_v3.py", "type": "file" },
+            { "name": "requirements-all.txt", "type": "file" },
+            { "name": "pyproject.toml", "type": "file" },
+            { "name": "setup.md", "type": "file" },
+            {
+                "name": "desktop_v4",
+                "type": "directory",
+                "children": [
+                    { "name": "app.py", "type": "file" },
+                    { "name": "README.md", "type": "file" },
+                    { "name": "DESKTOP_CONTEXT.md", "type": "file" }
+                ]
+            },
+            {
+                "name": "src",
+                "type": "directory",
+                "children": [
+                    {
+                        "name": "chat_sql",
+                        "type": "directory",
+                        "children": [
+                            { "name": "rag.py", "type": "file" },
+                            { "name": "llm_service.py", "type": "file" },
+                            { "name": "sql_validator.py", "type": "file" },
+                            { "name": "executor.py", "type": "file" }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "chat_sql",
+                "type": "directory",
+                "children": [
+                    { "name": "schema_retrieval.py", "type": "file" }
+                ]
+            },
+            { "name": "data", "type": "directory", "children": [] },
+            { "name": "docker", "type": "directory", "children": [] },
+            { "name": "docs", "type": "directory", "children": [] },
+            { "name": "scripts", "type": "directory", "children": [] },
+            { "name": "tests", "type": "directory", "children": [] },
+            { "name": "training", "type": "directory", "children": [] }
+        ]
+    },
+    "images": [
+        {
+            "url": "https://raw.githubusercontent.com/adityatiwari12/TalkwithDB/version5/Screenshot%202026-04-24%20194645.png",
+            "alt": "TalkWithDB desktop UI",
+            "description": "TalkWithDB desktop chat interface"
+        },
+        {
+            "url": "https://raw.githubusercontent.com/adityatiwari12/TalkwithDB/version5/Screenshot%202026-04-24%20232606.png",
+            "alt": "TalkWithDB chat interactions",
+            "description": "Chat interactions with copy, edit, and regenerate"
+        }
+    ]
+}

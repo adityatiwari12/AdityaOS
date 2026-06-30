@@ -1,0 +1,179 @@
+:root {
+  /* Apple vibrancy materials (NSVisualEffectView-inspired) */
+  --glass-bg: rgba(40, 40, 43, 0.55);
+  --glass-bg-strong: rgba(30, 30, 32, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-blur: 30px;
+  --glass-saturate: 180%;
+
+  /* macOS window chrome materials */
+  --titlebar-bg: rgba(54, 54, 57, 0.72);
+  --window-bg: #1e1e20;
+  --hairline: rgba(255, 255, 255, 0.08);
+
+  /* Apple system colors (Dark Mode) */
+  --system-blue: #0a84ff;
+  --system-green: #30d158;
+  --system-indigo: #5e5ce6;
+  --system-orange: #ff9f0a;
+  --system-pink: #ff375f;
+  --system-purple: #bf5af2;
+  --system-red: #ff453a;
+  --system-yellow: #ffd60a;
+  --system-gray: #98989d;
+  --accent: var(--system-blue);
+
+  /* Traffic lights */
+  --tl-close: #ff5f57;
+  --tl-min: #febc2e;
+  --tl-zoom: #28c840;
+
+  /* Apple layered shadows */
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.18), 0 8px 24px rgba(0, 0, 0, 0.22);
+  --shadow-window: 0 0 0 0.5px rgba(0, 0, 0, 0.4), 0 22px 70px rgba(0, 0, 0, 0.55), 0 6px 18px rgba(0, 0, 0, 0.35);
+  --shadow-dock: 0 0 0 0.5px rgba(255, 255, 255, 0.06), 0 16px 48px rgba(0, 0, 0, 0.4);
+
+  /* Gradients */
+  --gradient-morning: linear-gradient(135deg, #ff9a56 0%, #ff6a88 50%, #ff99ac 100%);
+  --gradient-afternoon: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --gradient-evening: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  --gradient-night: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+
+  /* Apple easing curves */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Radii (macOS Big Sur+) */
+  --radius-window: 11px;
+  --radius-dock: 22px;
+  --radius-glass: 18px;
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
+}
+
+.glass-strong {
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
+}
+
+.shadow-window {
+  box-shadow: var(--shadow-window);
+}
+
+.shadow-dock {
+  box-shadow: var(--shadow-dock);
+}
+
+.shadow-soft {
+  box-shadow: var(--shadow-soft);
+}
+
+/* Apple control primitives */
+.apple-titlebar {
+  background: var(--titlebar-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border-bottom: 0.5px solid var(--hairline);
+}
+
+.apple-btn {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 7px;
+  font-weight: 500;
+  transition: filter 0.15s var(--ease-standard), transform 0.1s var(--ease-standard);
+}
+.apple-btn:hover { filter: brightness(1.08); }
+.apple-btn:active { transform: scale(0.97); filter: brightness(0.95); }
+
+/* Hide scrollbar while keeping scroll functionality */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================ */
+/* Weather effect animations    */
+/* ============================ */
+
+@keyframes wx-rain-fall {
+  0% { transform: translateY(-120%) translateX(0); }
+  100% { transform: translateY(120vh) translateX(-6vw); }
+}
+
+@keyframes wx-snow-fall {
+  0% { transform: translateY(-10%) translateX(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(110vh) translateX(8vw); opacity: 0.2; }
+}
+
+@keyframes wx-cloud-drift {
+  0% { transform: translateX(-30vw); }
+  100% { transform: translateX(130vw); }
+}
+
+@keyframes wx-lightning {
+  0%, 92%, 100% { opacity: 0; }
+  93% { opacity: 0.85; }
+  94% { opacity: 0.1; }
+  95% { opacity: 0.7; }
+  97% { opacity: 0; }
+}
+
+.wx-drop {
+  position: absolute;
+  top: 0;
+  width: 1.5px;
+  height: 70px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(174, 205, 255, 0.55));
+  border-radius: 2px;
+  animation: wx-rain-fall linear infinite;
+}
+
+.wx-flake {
+  position: absolute;
+  top: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  filter: blur(0.3px);
+  animation: wx-snow-fall linear infinite;
+}
+
+.wx-cloud {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+  filter: blur(8px);
+  animation: wx-cloud-drift linear infinite;
+}
+
+.wx-lightning {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.9), transparent 60%);
+  animation: wx-lightning 7s linear infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

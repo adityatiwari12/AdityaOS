@@ -1,0 +1,6 @@
+# Exclude large local-only assets from Vercel uploads (100 MB limit per file).
+portfolio video.mp4
+pictures/
+node_modules/
+.env
+.env.*
