@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   BsSearch, BsCpu, BsDiagram3, BsDatabase, BsLayersHalf, BsFolderFill,
   BsStack, BsGraphUp, BsShieldLock, BsLightningCharge, BsClockHistory,
-  BsArrowDown, BsArrowRight, BsChevronRight, BsChevronDown,
-  BsCircleFill, BsCheck2,
+  BsArrowDown, BsChevronRight, BsChevronDown, BsCircleFill, BsCheck2,
 } from 'react-icons/bs';
 import { useOSStore } from '../../stores/osStore';
 import type { AppWindowProps } from '../../os/types';
@@ -14,39 +13,88 @@ type SectionId =
   | 'folder-structure' | 'tech-stack' | 'performance' | 'security'
   | 'cost-optimization' | 'version-history';
 
-const SECTIONS: { id: SectionId; label: string; Icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
-  { id: 'architecture',       label: 'Architecture',          Icon: BsDiagram3 },
-  { id: 'ai-pipeline',        label: 'AI Pipeline',           Icon: BsCpu },
-  { id: 'state-management',   label: 'State Management',      Icon: BsDatabase },
-  { id: 'window-manager',     label: 'Window Manager',        Icon: BsLayersHalf },
-  { id: 'folder-structure',   label: 'Folder Structure',      Icon: BsFolderFill },
-  { id: 'tech-stack',         label: 'Tech Stack',            Icon: BsStack },
-  { id: 'performance',        label: 'Performance',           Icon: BsGraphUp },
-  { id: 'security',           label: 'Security',              Icon: BsShieldLock },
-  { id: 'cost-optimization',  label: 'AI Cost Optimization',  Icon: BsLightningCharge },
-  { id: 'version-history',    label: 'Version History',       Icon: BsClockHistory },
+const SECTIONS: {
+  id: SectionId; label: string;
+  Icon: React.ComponentType<{ size?: number; className?: string }>;
+  iconBg: string;
+}[] = [
+  { id: 'architecture',      label: 'Architecture',         Icon: BsDiagram3,       iconBg: 'bg-blue-600' },
+  { id: 'ai-pipeline',       label: 'AI Pipeline',          Icon: BsCpu,            iconBg: 'bg-orange-500' },
+  { id: 'state-management',  label: 'State Management',     Icon: BsDatabase,       iconBg: 'bg-green-600' },
+  { id: 'window-manager',    label: 'Window Manager',       Icon: BsLayersHalf,     iconBg: 'bg-purple-600' },
+  { id: 'folder-structure',  label: 'Folder Structure',     Icon: BsFolderFill,     iconBg: 'bg-yellow-500' },
+  { id: 'tech-stack',        label: 'Tech Stack',           Icon: BsStack,          iconBg: 'bg-indigo-500' },
+  { id: 'performance',       label: 'Performance',          Icon: BsGraphUp,        iconBg: 'bg-red-500' },
+  { id: 'security',          label: 'Security',             Icon: BsShieldLock,     iconBg: 'bg-teal-600' },
+  { id: 'cost-optimization', label: 'AI Cost Optimization', Icon: BsLightningCharge,iconBg: 'bg-amber-500' },
+  { id: 'version-history',   label: 'Version History',      Icon: BsClockHistory,   iconBg: 'bg-slate-500' },
 ];
 
-// ── Shared ─────────────────────────────────────────────────────────────────────
+// ── macOS-style primitives ────────────────────────────────────────────────────
 
 function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className="mb-6">
-      <h1 className="text-xl font-bold text-white">{title}</h1>
-      <p className="text-xs text-white/40 mt-1">{subtitle}</p>
+    <div className="mb-5">
+      <h1 className="text-[17px] font-semibold text-white tracking-tight">{title}</h1>
+      <p className="text-[12px] text-[rgba(235,235,245,0.45)] mt-0.5">{subtitle}</p>
     </div>
   );
 }
 
-function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`rounded-xl border border-white/10 bg-white/5 p-4 ${className}`}>{children}</div>;
+/** macOS grouped-table section wrapper. */
+function Group({ label, children }: { label?: string; children: React.ReactNode }) {
+  return (
+    <div className="mb-5">
+      {label && (
+        <p className="text-[11px] font-semibold text-[rgba(235,235,245,0.4)] uppercase tracking-wider mb-1.5 px-1">{label}</p>
+      )}
+      <div className="rounded-xl bg-[#2C2C2E] overflow-hidden divide-y divide-white/[0.06]">
+        {children}
+      </div>
+    </div>
+  );
 }
 
-function FlowArrow() {
+/** Single row inside a Group. */
+function Row({
+  label, sub, value, badge, mono = false, children,
+}: {
+  label: string; sub?: string; value?: string;
+  badge?: { text: string; color: string };
+  mono?: boolean; children?: React.ReactNode;
+}) {
   return (
-    <div className="flex flex-col items-center my-0.5">
-      <div className="w-px h-3 bg-white/20" />
-      <BsArrowDown size={9} className="text-white/35" />
+    <div className="flex items-center gap-3 px-4 py-[11px]">
+      <div className="flex-1 min-w-0">
+        <p className="text-[13px] text-white leading-snug">{label}</p>
+        {sub && <p className="text-[11px] text-[rgba(235,235,245,0.38)] mt-0.5 leading-snug">{sub}</p>}
+      </div>
+      {badge && (
+        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${badge.color}`}>{badge.text}</span>
+      )}
+      {value && (
+        <span className={`text-[13px] text-[rgba(235,235,245,0.45)] shrink-0 text-right ${mono ? 'font-mono text-[11px]' : ''}`}>{value}</span>
+      )}
+      {children}
+    </div>
+  );
+}
+
+/** Node in a flow diagram. */
+function FlowNode({ title, sub, tint }: { title: string; sub: string; tint?: string }) {
+  return (
+    <div className={`w-full rounded-xl px-4 py-3 border ${tint ?? 'bg-[#3A3A3C] border-white/[0.08]'}`}>
+      <p className="text-[13px] font-medium text-white">{title}</p>
+      <p className="text-[11px] text-[rgba(235,235,245,0.4)] mt-0.5">{sub}</p>
+    </div>
+  );
+}
+
+function Connector() {
+  return (
+    <div className="flex flex-col items-center my-[5px]">
+      <div className="w-px h-3 bg-white/[0.12]" />
+      <BsArrowDown size={8} className="text-white/20" />
     </div>
   );
 }
@@ -54,55 +102,61 @@ function FlowArrow() {
 // ── Architecture ───────────────────────────────────────────────────────────────
 
 function ArchitectureSection() {
-  const layers = [
-    { label: 'Browser Layer', sub: 'React 19 Islands · Framer Motion · Zustand', desc: 'Only island components hydrate — zero JS for static content.', dot: 'bg-sky-400', border: 'border-sky-500/30 bg-sky-500/10' },
-    { label: 'Astro 5 SSR', sub: 'src/pages/ · API Routes · Env secrets', desc: 'Server-renders HTML, handles API proxies, never exposes keys.', dot: 'bg-violet-400', border: 'border-violet-500/30 bg-violet-500/10' },
-    { label: 'Vercel Edge Network', sub: 'CDN · Serverless Functions · Node 22', desc: '40-region global deployment, preview per commit, instant rollback.', dot: 'bg-slate-400', border: 'border-slate-500/30 bg-slate-500/10' },
-  ];
-  const services = [
-    { label: 'Groq API', sub: 'llama-3.3-70b inference', tc: 'text-orange-300', bc: 'border-orange-500/30 bg-orange-500/10' },
-    { label: 'Neon Postgres', sub: 'Lead capture + analytics', tc: 'text-green-300', bc: 'border-green-500/30 bg-green-500/10' },
-    { label: 'Sarvam TTS', sub: 'Tour voice synthesis', tc: 'text-blue-300', bc: 'border-blue-500/30 bg-blue-500/10' },
-  ];
   return (
     <div>
-      <SectionHeader title="Architecture" subtitle="System layers from browser to external services" />
-      <div className="space-y-1">
-        {layers.map((l, i) => (
-          <div key={l.label}>
-            <motion.div initial={{ x: -14, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: i * 0.09 }}
-              className={`rounded-xl border p-3.5 ${l.border}`}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <span className={`w-2 h-2 rounded-full shrink-0 mt-0.5 ${l.dot}`} />
-                  <div>
-                    <p className="text-sm font-semibold text-white">{l.label}</p>
-                    <p className="text-[10px] font-mono text-white/45 mt-0.5">{l.sub}</p>
-                  </div>
+      <SectionHeader title="Architecture" subtitle="System design and infrastructure layers" />
+
+      <Group label="Overview">
+        <Row label="Framework"   value="Astro 5" />
+        <Row label="Rendering"   value="Islands (SSR + React 19)" />
+        <Row label="Runtime"     value="Node.js 22" />
+        <Row label="Deployment"  value="Vercel Edge Network" />
+        <Row label="Database"    value="Neon Postgres (serverless)" />
+      </Group>
+
+      <p className="text-[11px] font-semibold text-[rgba(235,235,245,0.4)] uppercase tracking-wider mb-1.5 px-1">System Layers</p>
+      <div className="rounded-xl bg-[#2C2C2E] p-4 mb-5">
+        <div className="flex flex-col items-center">
+          {[
+            { label: 'Browser Layer',      sub: 'React 19 Islands · Framer Motion · Zustand',     dot: 'bg-blue-400' },
+            { label: 'Astro 5 SSR',        sub: 'API Routes · Middleware · Environment secrets',   dot: 'bg-violet-400' },
+            { label: 'Vercel Edge Network',sub: 'CDN · Serverless Functions · 40 regions',         dot: 'bg-slate-400' },
+          ].map((layer, i, arr) => (
+            <div key={layer.label} className="w-full flex flex-col items-center">
+              <motion.div initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.09 }}
+                className="w-full flex items-center gap-3 bg-[#3A3A3C] rounded-xl px-4 py-3">
+                <span className={`w-2 h-2 rounded-full shrink-0 ${layer.dot}`} />
+                <div>
+                  <p className="text-[13px] font-medium text-white">{layer.label}</p>
+                  <p className="text-[11px] text-[rgba(235,235,245,0.38)] mt-0.5 font-mono">{layer.sub}</p>
                 </div>
-                <p className="text-[10px] text-white/40 text-right max-w-[42%] leading-relaxed">{l.desc}</p>
-              </div>
-            </motion.div>
-            {i < layers.length - 1 && <FlowArrow />}
-          </div>
-        ))}
-        <FlowArrow />
-        <div className="grid grid-cols-3 gap-2.5">
-          {services.map((s, i) => (
-            <motion.div key={s.label} initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 + i * 0.07 }}
-              className={`rounded-xl border p-3 ${s.bc}`}>
-              <p className={`text-xs font-semibold ${s.tc}`}>{s.label}</p>
-              <p className="text-[10px] text-white/35 mt-0.5">{s.sub}</p>
-            </motion.div>
+              </motion.div>
+              {i < arr.length - 1 && <Connector />}
+            </div>
           ))}
+          <Connector />
+          <div className="w-full grid grid-cols-3 gap-2">
+            {[
+              { label: 'Groq API',      sub: 'llama-3.3-70b',  dot: 'bg-orange-400' },
+              { label: 'Neon Postgres', sub: 'Lead + analytics',dot: 'bg-green-400' },
+              { label: 'Sarvam TTS',    sub: 'Tour narration',  dot: 'bg-sky-400' },
+            ].map((s, i) => (
+              <motion.div key={s.label} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 + i * 0.07 }}
+                className="bg-[#3A3A3C] rounded-xl px-3 py-2.5">
+                <span className={`w-1.5 h-1.5 rounded-full inline-block mr-1.5 ${s.dot}`} />
+                <p className="text-[12px] font-medium text-white inline">{s.label}</p>
+                <p className="text-[10px] text-[rgba(235,235,245,0.35)] mt-0.5">{s.sub}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
-      <div className="mt-5 p-3.5 rounded-xl bg-white/3 border border-white/8">
-        <p className="text-[11px] text-white/40 leading-relaxed">
-          <span className="text-white/60 font-medium">Data flow:</span> Browser → Astro API route → Vercel Edge → External API → JSON response → Zustand dispatch → React re-render.
-          API keys live only in Vercel env vars — never bundled or shipped to the browser.
-        </p>
-      </div>
+
+      <Group label="Data Flow">
+        <Row label="Request path" value="Browser → Astro API → Vercel → External" />
+        <Row label="Secret protection" value="Env vars only — never bundled" />
+        <Row label="Client bundle" value="Zero server secrets" />
+      </Group>
     </div>
   );
 }
@@ -112,60 +166,58 @@ function ArchitectureSection() {
 function AIPipelineSection() {
   return (
     <div>
-      <SectionHeader title="AI Pipeline" subtitle="Every query from input to OS action" />
-      <div className="flex flex-col items-center">
-        {[
-          { label: 'User Input', sub: 'Natural language query in the copilot', c: 'border-sky-500/40 bg-sky-500/10', tc: 'text-sky-300' },
-          { label: 'Offline NLP Parser', sub: 'Regex · keyword extraction · intent mapping · action routing', c: 'border-violet-500/40 bg-violet-500/10', tc: 'text-violet-300' },
-          { label: 'Confidence Scoring', sub: '0.0–1.0 score based on pattern match strength + intent clarity', c: 'border-amber-500/40 bg-amber-500/10', tc: 'text-amber-300' },
-        ].map((step, i) => (
-          <div key={step.label} className="flex flex-col items-center w-full">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.1 }}
-              className={`w-full max-w-md rounded-xl border p-3 ${step.c}`}>
-              <p className={`text-sm font-semibold ${step.tc}`}>{step.label}</p>
-              <p className="text-[11px] text-white/45 mt-0.5">{step.sub}</p>
-            </motion.div>
-            <FlowArrow />
-          </div>
-        ))}
+      <SectionHeader title="AI Pipeline" subtitle="Every query from natural language to OS action" />
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="w-full">
-          <div className="flex gap-3 justify-center items-start">
-            <div className="flex flex-col items-center gap-1 flex-1">
-              <div className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium">Score ≥ 0.7</div>
-              <div className="w-px h-3 bg-white/20" />
-              <div className="w-full rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-center">
-                <p className="text-xs font-semibold text-emerald-300">Local Execution</p>
-                <p className="text-[10px] text-white/35 mt-0.5">Zero cost · &lt;5ms</p>
-              </div>
+      <p className="text-[11px] font-semibold text-[rgba(235,235,245,0.4)] uppercase tracking-wider mb-1.5 px-1">Query Flow</p>
+      <div className="rounded-xl bg-[#2C2C2E] p-4 mb-5">
+        <div className="flex flex-col items-center">
+          {[
+            { title: 'User Input', sub: 'Natural language query in the Copilot' },
+            { title: 'Offline NLP Parser', sub: 'Regex · keyword extraction · intent mapping' },
+            { title: 'Confidence Scoring', sub: '0.0 – 1.0 score based on pattern match strength' },
+          ].map((step, i) => (
+            <div key={step.title} className="w-full flex flex-col items-center">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.1 }} className="w-full">
+                <FlowNode title={step.title} sub={step.sub} />
+              </motion.div>
+              <Connector />
             </div>
-            <div className="pt-5 text-white/15 text-xs">|</div>
-            <div className="flex flex-col items-center gap-1 flex-1">
-              <div className="text-[10px] px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 font-medium">Score &lt; 0.7</div>
-              <div className="w-px h-3 bg-white/20" />
-              <div className="w-full rounded-xl border border-orange-500/30 bg-orange-500/10 p-2.5 text-center">
-                <p className="text-xs font-semibold text-orange-300">Groq API</p>
-                <p className="text-[10px] text-white/35 mt-0.5">llama-3.3-70b · ~300ms</p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+          ))}
 
-        <FlowArrow />
-        {[
-          { label: 'Parse OS Actions', sub: 'openWindow · closeWindow · navigate · showMedia · message', c: 'border-violet-500/40 bg-violet-500/10', tc: 'text-violet-300' },
-          { label: 'Execute in UI', sub: 'Zustand dispatch · React re-render · framer-motion transition', c: 'border-sky-500/40 bg-sky-500/10', tc: 'text-sky-300' },
-        ].map((step, i) => (
-          <div key={step.label} className="flex flex-col items-center w-full">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 + i * 0.1 }}
-              className={`w-full max-w-md rounded-xl border p-3 ${step.c}`}>
-              <p className={`text-xs font-semibold text-center ${step.tc}`}>{step.label}</p>
-              <p className="text-[10px] text-white/45 mt-0.5 text-center">{step.sub}</p>
-            </motion.div>
-            {i === 0 && <FlowArrow />}
-          </div>
-        ))}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="w-full grid grid-cols-2 gap-2.5 mb-1">
+            <div className="rounded-xl bg-[#1A3028] border border-green-500/20 px-4 py-3">
+              <p className="text-[10px] font-semibold text-green-400 uppercase tracking-wide mb-1">Score ≥ 0.7</p>
+              <p className="text-[13px] font-medium text-white">Local Execution</p>
+              <p className="text-[11px] text-[rgba(235,235,245,0.38)] mt-0.5">$0.00 · &lt;5ms</p>
+            </div>
+            <div className="rounded-xl bg-[#2C1F10] border border-orange-500/20 px-4 py-3">
+              <p className="text-[10px] font-semibold text-orange-400 uppercase tracking-wide mb-1">Score &lt; 0.7</p>
+              <p className="text-[13px] font-medium text-white">Groq API</p>
+              <p className="text-[11px] text-[rgba(235,235,245,0.38)] mt-0.5">llama-3.3-70b · ~300ms</p>
+            </div>
+          </motion.div>
+
+          {[
+            { title: 'Parse OS Actions', sub: 'openWindow · closeWindow · navigate · showMedia · message' },
+            { title: 'Execute in UI', sub: 'Zustand dispatch · React re-render · Framer Motion transition' },
+          ].map((step, i, arr) => (
+            <div key={step.title} className="w-full flex flex-col items-center">
+              <Connector />
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 + i * 0.1 }} className="w-full">
+                <FlowNode title={step.title} sub={step.sub} />
+              </motion.div>
+            </div>
+          ))}
+        </div>
       </div>
+
+      <Group label="Configuration">
+        <Row label="LLM Provider"         value="Groq SDK" />
+        <Row label="Model"                value="llama-3.3-70b" />
+        <Row label="Confidence Threshold" value="0.7" />
+        <Row label="Offline Coverage"     value="~70% of queries" />
+        <Row label="Fallback Latency"     value="~300ms median" />
+      </Group>
     </div>
   );
 }
@@ -173,67 +225,94 @@ function AIPipelineSection() {
 // ── State Management ───────────────────────────────────────────────────────────
 
 function StateManagementSection() {
+  const [open, setOpen] = useState<string | null>('osStore');
+
   const stores = [
     {
-      name: 'osStore', file: 'src/stores/osStore.ts', color: 'text-emerald-400',
-      state: ['windows: WindowState[]', 'booted: boolean', 'kernelPanic: boolean', 'retroMode: boolean', 'weather: WeatherState', 'customWallpaper: string | null'],
-      actions: ['openWindow()', 'closeWindow()', 'focusWindow()', 'minimizeWindow()', 'updateWindowPosition()', 'closeAllWindows()', 'executeCopilotActions()'],
+      name: 'osStore', file: 'src/stores/osStore.ts',
+      state: [
+        'windows: WindowState[]', 'booted: boolean', 'kernelPanic: boolean',
+        'retroMode: boolean', 'weather: WeatherState', 'customWallpaper: string | null',
+      ],
+      actions: [
+        'openWindow()', 'closeWindow()', 'focusWindow()', 'minimizeWindow()',
+        'updateWindowPosition()', 'closeAllWindows()', 'executeCopilotActions()',
+      ],
     },
     {
-      name: 'tourStore', file: 'src/stores/tourStore.ts', color: 'text-violet-400',
-      state: ['running: boolean', 'step: number', 'totalSteps: number', 'muted: boolean', 'captionTitle: string', 'captionBody: string', 'showFinal: boolean'],
+      name: 'tourStore', file: 'src/stores/tourStore.ts',
+      state: [
+        'running: boolean', 'step: number', 'totalSteps: number',
+        'muted: boolean', 'captionTitle: string', 'captionBody: string', 'showFinal: boolean',
+      ],
       actions: ['startTour()', 'skipTour()', 'toggleMute()', '_advance(step, title, body)', '_finish()'],
     },
   ];
-  const lifecycle = [
-    { label: 'CLOSED', c: 'bg-white/10 text-white/40' },
-    { label: 'OPEN', c: 'bg-sky-500/20 text-sky-300' },
-    { label: 'FOCUSED', c: 'bg-emerald-500/20 text-emerald-300' },
-    { label: 'MINIMIZED', c: 'bg-amber-500/20 text-amber-300' },
-  ];
+
   return (
     <div>
-      <SectionHeader title="State Management" subtitle="Zustand stores powering the entire OS" />
-      <div className="space-y-3 mb-6">
-        {stores.map((store, i) => (
-          <motion.div key={store.name} initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: i * 0.1 }}>
-            <Card>
-              <div className="flex items-center gap-2 mb-3">
-                <span className={`font-mono text-sm font-bold ${store.color}`}>{store.name}</span>
-                <span className="text-[10px] text-white/25 font-mono ml-1">{store.file}</span>
+      <SectionHeader title="State Management" subtitle="Zustand stores powering the AdityaOS runtime" />
+
+      <Group label="Stores">
+        {stores.map((store) => (
+          <div key={store.name}>
+            <button onClick={() => setOpen(open === store.name ? null : store.name)}
+              className="w-full flex items-center gap-3 px-4 py-[11px] text-left hover:bg-white/[0.04] transition-colors">
+              <div className="flex-1">
+                <p className="text-[13px] text-white font-mono">{store.name}</p>
+                <p className="text-[11px] text-[rgba(235,235,245,0.38)] mt-0.5 font-mono">{store.file}</p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-[9px] uppercase tracking-wider text-white/25 mb-2">State</p>
-                  <div className="space-y-1">
-                    {store.state.map(s => <p key={s} className="text-[10px] font-mono text-white/55">{s}</p>)}
+              <AnimatePresence mode="wait" initial={false}>
+                {open === store.name
+                  ? <motion.span key="d" initial={{ rotate: 0 }} animate={{ rotate: 0 }}><BsChevronDown size={11} className="text-white/30" /></motion.span>
+                  : <motion.span key="r" initial={{ rotate: 0 }} animate={{ rotate: 0 }}><BsChevronRight size={11} className="text-white/30" /></motion.span>
+                }
+              </AnimatePresence>
+            </button>
+            <AnimatePresence>
+              {open === store.name && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden border-t border-white/[0.06]">
+                  <div className="px-4 py-3 grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[10px] text-[rgba(235,235,245,0.3)] uppercase tracking-wider mb-2">State</p>
+                      <div className="space-y-1">
+                        {store.state.map(s => <p key={s} className="text-[11px] font-mono text-[rgba(235,235,245,0.55)]">{s}</p>)}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-[rgba(235,235,245,0.3)] uppercase tracking-wider mb-2">Actions</p>
+                      <div className="space-y-1">
+                        {store.actions.map(a => <p key={a} className="text-[11px] font-mono text-[rgba(52,199,89,0.8)]">{a}</p>)}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <p className="text-[9px] uppercase tracking-wider text-white/25 mb-2">Actions</p>
-                  <div className="space-y-1">
-                    {store.actions.map(a => <p key={a} className={`text-[10px] font-mono ${store.color} opacity-70`}>{a}</p>)}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-      <p className="text-[9px] uppercase tracking-wider text-white/25 mb-2.5">Window Lifecycle</p>
-      <div className="flex items-center gap-2 flex-wrap">
-        {lifecycle.map((s, i) => (
-          <div key={s.label} className="flex items-center gap-2">
-            <span className={`text-[10px] font-mono px-2 py-1 rounded-md ${s.c}`}>{s.label}</span>
-            {i < lifecycle.length - 1 && <BsArrowRight size={9} className="text-white/20" />}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         ))}
-        <BsArrowRight size={9} className="text-white/20" />
-        <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-white/10 text-white/40">CLOSED</span>
-      </div>
-      <div className="mt-4 p-3 rounded-lg bg-white/3 border border-white/8">
-        <p className="text-[10px] text-white/40 leading-relaxed">
-          Zustand's <code className="text-white/60">getState()</code> enables imperative dispatch outside React — the tour script and copilot actions use this to trigger window opens without hooks or context.
+      </Group>
+
+      <p className="text-[11px] font-semibold text-[rgba(235,235,245,0.4)] uppercase tracking-wider mb-1.5 px-1">Window Lifecycle</p>
+      <div className="rounded-xl bg-[#2C2C2E] p-4 mb-5">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {[
+            { label: 'CLOSED',   c: 'bg-white/10 text-white/40' },
+            { label: 'OPEN',     c: 'bg-[#1C3A5C] text-[#4FC3F7]' },
+            { label: 'FOCUSED',  c: 'bg-[#1A3028] text-[#34C759]' },
+            { label: 'MINIMIZED',c: 'bg-[#2C2010] text-[#FF9F0A]' },
+          ].map((s, i, arr) => (
+            <div key={s.label} className="flex items-center gap-1.5">
+              <span className={`text-[10px] font-mono font-semibold px-2 py-1 rounded-lg ${s.c}`}>{s.label}</span>
+              {i < arr.length - 1 && <span className="text-white/15 text-xs">→</span>}
+            </div>
+          ))}
+          <span className="text-white/15 text-xs">→</span>
+          <span className="text-[10px] font-mono font-semibold px-2 py-1 rounded-lg bg-white/10 text-white/40">CLOSED</span>
+        </div>
+        <p className="text-[11px] text-[rgba(235,235,245,0.3)] mt-3 leading-relaxed">
+          <code className="text-[rgba(235,235,245,0.5)]">getState()</code> enables imperative dispatch outside React — tour script and copilot actions use this without hooks.
         </p>
       </div>
     </div>
@@ -244,56 +323,39 @@ function StateManagementSection() {
 
 function WindowManagerSection() {
   const windows = useOSStore((s) => s.windows);
-  const zLayers = [
-    { label: 'Tour UI (VirtualCursor, Captions, Skip)', z: '9970–9999', c: 'border-violet-500/40 bg-violet-500/10 text-violet-300' },
-    { label: 'Modals (Spotlight, Shortcuts, CareerControl)', z: '9000–9960', c: 'border-amber-500/40 bg-amber-500/10 text-amber-300' },
-    { label: 'Dock & Menu Bar', z: '200–300', c: 'border-sky-500/40 bg-sky-500/10 text-sky-300' },
-    { label: 'App Windows (dynamic z-index promotion)', z: '100–199', c: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300' },
-    { label: 'Desktop Widgets & Wallpaper', z: '1–10', c: 'border-white/15 bg-white/5 text-white/45' },
-  ];
+
   return (
     <div>
       <SectionHeader title="Window Manager" subtitle="Z-index system and live window states" />
-      <div className="grid grid-cols-2 gap-3 mb-5">
-        <Card>
-          <p className="text-[9px] uppercase tracking-wider text-white/25 mb-3">Live Windows</p>
-          {windows.length === 0
-            ? <p className="text-xs text-white/25 italic">No windows open</p>
-            : <div className="space-y-1.5">
-                {windows.map(w => (
-                  <div key={w.id} className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-mono text-white/65 truncate">{w.title}</span>
-                    <span className={`text-[9px] px-1.5 py-0.5 rounded shrink-0 ${w.minimized ? 'bg-amber-500/20 text-amber-400' : w.focused ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/10 text-white/35'}`}>
-                      {w.minimized ? 'min' : w.focused ? 'focus' : 'bg'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-          }
-          <p className="text-[10px] text-white/25 mt-3 pt-3 border-t border-white/8">{windows.length} window{windows.length !== 1 ? 's' : ''} open</p>
-        </Card>
-        <Card>
-          <p className="text-[9px] uppercase tracking-wider text-white/25 mb-3">Window Features</p>
-          <div className="space-y-1.5">
-            {['Drag to reposition', 'Resize via handle', 'Minimize to dock badge', 'Focus → z-index promotion', 'Singleton enforcement', 'Payload pass-through', 'Framer spring on open'].map(f => (
-              <div key={f} className="flex items-center gap-2">
-                <BsCheck2 size={10} className="text-emerald-400 shrink-0" />
-                <span className="text-[10px] text-white/55">{f}</span>
-              </div>
-            ))}
+
+      <Group label={`Live Windows (${windows.length})`}>
+        {windows.length === 0
+          ? <div className="px-4 py-[11px]"><p className="text-[13px] text-[rgba(235,235,245,0.3)] italic">No windows open</p></div>
+          : windows.map((w) => (
+              <Row key={w.id} label={w.title} sub={`z: ${w.zIndex}`}
+                badge={w.minimized ? { text: 'minimized', color: 'bg-[#2C1F10] text-[#FF9F0A]' } : w.focused ? { text: 'focused', color: 'bg-[#1A3028] text-[#34C759]' } : { text: 'background', color: 'bg-white/8 text-white/35' }} />
+            ))
+        }
+      </Group>
+
+      <Group label="Z-Index Layers">
+        {[
+          { label: 'Tour UI',            sub: 'VirtualCursor, Captions, Skip',        value: '9970–9999' },
+          { label: 'Modals & Overlays',  sub: 'Spotlight, Shortcuts, CareerControl',  value: '9000–9960' },
+          { label: 'Dock & Menu Bar',    sub: 'Always above windows',                 value: '200–300' },
+          { label: 'App Windows',        sub: 'Dynamic promotion on focus',           value: '100–199' },
+          { label: 'Desktop Widgets',    sub: 'Profile widget, wallpaper',            value: '1–10' },
+        ].map((l) => <Row key={l.label} label={l.label} sub={l.sub} value={l.value} mono />)}
+      </Group>
+
+      <Group label="Features">
+        {['Drag to reposition', 'Resize via corner handle', 'Minimize to dock badge', 'Focus → z-index promotion', 'Singleton enforcement per appId', 'WindowPayload pass-through'].map((f) => (
+          <div key={f} className="flex items-center gap-3 px-4 py-2.5">
+            <BsCheck2 size={11} className="text-[#34C759] shrink-0" />
+            <span className="text-[13px] text-[rgba(235,235,245,0.7)]">{f}</span>
           </div>
-        </Card>
-      </div>
-      <p className="text-[9px] uppercase tracking-wider text-white/25 mb-2.5">Z-Index Layers (top to bottom)</p>
-      <div className="space-y-1.5">
-        {zLayers.map((l, i) => (
-          <motion.div key={l.label} initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: i * 0.06 }}
-            className={`flex items-center justify-between rounded-lg border px-3 py-2 ${l.c}`}>
-            <span className="text-[11px]">{l.label}</span>
-            <span className="text-[10px] font-mono opacity-60">z: {l.z}</span>
-          </motion.div>
         ))}
-      </div>
+      </Group>
     </div>
   );
 }
@@ -307,19 +369,14 @@ function TreeItem({ node, depth = 0 }: { node: TreeNode; depth?: number }) {
   const hasChildren = !!(node.children?.length);
   return (
     <div>
-      <div
-        className="flex items-start gap-1.5 py-0.5 px-1 rounded cursor-pointer hover:bg-white/5 group"
-        style={{ paddingLeft: `${depth * 14 + 4}px` }}
-        onClick={() => hasChildren && setOpen(!open)}
-      >
-        <span className="mt-0.5 shrink-0 w-3">
-          {hasChildren
-            ? open ? <BsChevronDown size={8} className="text-white/30" /> : <BsChevronRight size={8} className="text-white/30" />
-            : null
-          }
+      <div className="flex items-start gap-1.5 hover:bg-white/[0.04] rounded-lg transition-colors cursor-pointer py-0.5 px-1"
+        style={{ paddingLeft: `${depth * 16 + 4}px` }}
+        onClick={() => hasChildren && setOpen(!open)}>
+        <span className="mt-[3px] w-3 shrink-0">
+          {hasChildren ? (open ? <BsChevronDown size={8} className="text-white/30" /> : <BsChevronRight size={8} className="text-white/30" />) : null}
         </span>
-        <span className={`text-[11px] font-mono leading-snug ${node.color ?? 'text-white/60'}`}>{node.name}</span>
-        {node.desc && <span className="text-[9px] text-white/20 mt-0.5 ml-1 hidden group-hover:block">{node.desc}</span>}
+        <span className={`text-[12px] font-mono leading-snug ${node.color ?? 'text-[rgba(235,235,245,0.6)]'}`}>{node.name}</span>
+        {node.desc && !hasChildren && <span className="text-[10px] text-[rgba(235,235,245,0.22)] mt-[3px] ml-2 leading-snug">{node.desc}</span>}
       </div>
       {hasChildren && open && node.children!.map((c, i) => <TreeItem key={i} node={c} depth={depth + 1} />)}
     </div>
@@ -327,56 +384,52 @@ function TreeItem({ node, depth = 0 }: { node: TreeNode; depth?: number }) {
 }
 
 const TREE: TreeNode = {
-  name: 'src/', color: 'text-white/80',
+  name: 'src/', color: 'text-white/85',
   children: [
     { name: 'components/', children: [
-      { name: 'apps/', color: 'text-sky-400', desc: '16 app components (Camera, FounderHQ, Photos, HackathonRush, DeveloperSettings…)' },
-      { name: 'global/', color: 'text-green-400', desc: 'MacToolbar, Spotlight, ContactWidget, NotesApp, TourNotification' },
-      { name: 'os/', color: 'text-violet-400', desc: 'WindowManager, VirtualCursor, GuidedTour, BootSequence, Dock2' },
+      { name: 'apps/',    color: 'text-[#4FC3F7]', desc: '16 app components' },
+      { name: 'global/',  color: 'text-[#34C759]', desc: 'MacToolbar, Spotlight, Dock, Notifications' },
+      { name: 'os/',      color: 'text-[#BF5AF2]', desc: 'WindowManager, VirtualCursor, GuidedTour, Boot' },
     ]},
-    { name: 'config/', color: 'text-amber-400', desc: 'Content data, userConfig, app config' },
-    { name: 'layouts/', desc: 'AppLayout.tsx — desktop orchestrator, boot effect, keyboard shortcuts' },
+    { name: 'config/', color: 'text-[#FF9F0A]', desc: 'Content data, userConfig, app config' },
+    { name: 'layouts/', desc: 'AppLayout.tsx — desktop orchestrator + boot' },
     { name: 'lib/', desc: 'analytics.ts · easterEggs.ts · zIndex.ts' },
     { name: 'os/', children: [
-      { name: 'types.ts', color: 'text-amber-300', desc: 'AppId, WindowState, WindowPayload, AppDefinition' },
-      { name: 'appRegistry.tsx', color: 'text-amber-300', desc: '20+ app definitions with icons, colors, ideal sizes' },
-      { name: 'tourScript.ts', color: 'text-amber-300', desc: '9-step automated recruiter tour with per-photo narration' },
-      { name: 'WindowManager.tsx', color: 'text-amber-300', desc: 'Renders all open WindowStates via OSWindow' },
+      { name: 'types.ts',          color: 'text-[#FF9F0A]', desc: 'AppId, WindowState, WindowPayload' },
+      { name: 'appRegistry.tsx',   color: 'text-[#FF9F0A]', desc: '20+ app definitions' },
+      { name: 'tourScript.ts',     color: 'text-[#FF9F0A]', desc: '9-step automated recruiter tour' },
+      { name: 'WindowManager.tsx', color: 'text-[#FF9F0A]', desc: 'Renders all open windows' },
     ]},
     { name: 'pages/', children: [
-      { name: 'api/', color: 'text-rose-400', children: [
-        { name: 'chat.ts', color: 'text-rose-300', desc: 'Groq copilot proxy — auth + rate limit' },
-        { name: 'tts.ts', color: 'text-rose-300', desc: 'Sarvam TTS proxy — key server-only' },
-        { name: 'auth.ts', color: 'text-rose-300', desc: 'OAuth token exchange' },
-        { name: 'analytics.ts', color: 'text-rose-300', desc: 'Neon Postgres event logging' },
+      { name: 'api/', color: 'text-[#FF453A]', children: [
+        { name: 'chat.ts',      color: 'text-[#FF6B60]', desc: 'Groq copilot proxy + auth + rate limit' },
+        { name: 'tts.ts',      color: 'text-[#FF6B60]', desc: 'Sarvam TTS proxy — key server-only' },
+        { name: 'auth.ts',     color: 'text-[#FF6B60]', desc: 'OAuth token exchange' },
+        { name: 'analytics.ts',color: 'text-[#FF6B60]', desc: 'Neon Postgres event logging' },
       ]},
-      { name: 'index.astro', color: 'text-orange-400', desc: 'Entry point — SSR page serving the React desktop' },
+      { name: 'index.astro', color: 'text-[#FF9F0A]', desc: 'Entry point — SSR page serving React desktop' },
     ]},
     { name: 'stores/', children: [
-      { name: 'osStore.ts', color: 'text-emerald-400', desc: 'Windows, booted, weather, wallpaper, retroMode' },
-      { name: 'tourStore.ts', color: 'text-emerald-400', desc: 'Tour running/step/muted/captions' },
+      { name: 'osStore.ts',  color: 'text-[#34C759]', desc: 'Windows, booted, weather, wallpaper' },
+      { name: 'tourStore.ts',color: 'text-[#34C759]', desc: 'Tour running/step/muted/captions' },
     ]},
-    { name: 'styles/', desc: 'Global CSS, Tailwind utilities, scrollbar styles' },
+    { name: 'styles/', desc: 'Global CSS, Tailwind utilities' },
   ],
 };
 
 function FolderStructureSection() {
   return (
     <div>
-      <SectionHeader title="Folder Structure" subtitle="Click folders to expand — hover for descriptions" />
-      <Card className="mb-4"><TreeItem node={TREE} /></Card>
-      <div className="grid grid-cols-3 gap-2.5">
-        {[
-          { label: 'App Components', count: '16', c: 'text-sky-400', bc: 'border-sky-500/20 bg-sky-500/8' },
-          { label: 'API Routes', count: '6', c: 'text-rose-400', bc: 'border-rose-500/20 bg-rose-500/8' },
-          { label: 'Zustand Stores', count: '2', c: 'text-emerald-400', bc: 'border-emerald-500/20 bg-emerald-500/8' },
-        ].map(s => (
-          <div key={s.label} className={`rounded-lg border p-3 ${s.bc}`}>
-            <p className={`text-xl font-bold ${s.c}`}>{s.count}</p>
-            <p className="text-[10px] text-white/40 mt-0.5">{s.label}</p>
-          </div>
-        ))}
+      <SectionHeader title="Folder Structure" subtitle="Hover files for descriptions — click folders to expand" />
+      <div className="rounded-xl bg-[#2C2C2E] p-4 mb-5">
+        <TreeItem node={TREE} />
       </div>
+      <Group label="Summary">
+        <Row label="App Components"  value="16"      sub="Camera, FounderHQ, Photos, HackathonRush…" />
+        <Row label="API Routes"      value="6"       sub="chat, tts, auth, analytics, leads, cron" />
+        <Row label="Zustand Stores"  value="2"       sub="osStore + tourStore" />
+        <Row label="Total Source"    value="~8,000 lines" sub="TypeScript + TSX" />
+      </Group>
     </div>
   );
 }
@@ -384,42 +437,46 @@ function FolderStructureSection() {
 // ── Tech Stack ─────────────────────────────────────────────────────────────────
 
 const TECH = [
-  { name: 'Astro 5',      version: '5.x',       emoji: '🚀', bc: 'border-orange-500/30 bg-orange-500/8', tc: 'text-orange-300', reason: 'Zero-JS islands — only hydrates components that need interactivity. Static HTML for everything else.' },
-  { name: 'React 19',     version: '19.x',      emoji: '⚛️', bc: 'border-sky-500/30 bg-sky-500/8',    tc: 'text-sky-300',    reason: 'Concurrent features, stable use() hook, and islands pattern is a natural fit for the OS.' },
-  { name: 'TypeScript',   version: '5.7',       emoji: '🔷', bc: 'border-blue-500/30 bg-blue-500/8',  tc: 'text-blue-300',   reason: 'AppId union type prevents invalid window opens. WindowPayload index signature enables flexible payloads.' },
-  { name: 'Tailwind CSS', version: '4.x',       emoji: '🎨', bc: 'border-teal-500/30 bg-teal-500/8',  tc: 'text-teal-300',   reason: 'Zero dead CSS in production. Design tokens via CSS variables, trivial dark mode theming.' },
-  { name: 'Framer Motion',version: '12.x',      emoji: '✨', bc: 'border-violet-500/30 bg-violet-500/8',tc:'text-violet-300', reason: 'Spring physics for the virtual cursor, window drag inertia, boot sequence, and all transitions.' },
-  { name: 'Zustand 5',   version: '5.x',       emoji: '🐻', bc: 'border-amber-500/30 bg-amber-500/8', tc: 'text-amber-300',  reason: 'getState() outside React — tour script and copilot dispatch without hooks or context.' },
-  { name: 'Groq SDK',    version: '0.x',       emoji: '🤖', bc: 'border-emerald-500/30 bg-emerald-500/8',tc:'text-emerald-300',reason: 'llama-3.3-70b at ~300ms. 10× cheaper than GPT-4 for equivalent conversational quality.' },
-  { name: 'Neon Postgres',version: 'serverless',emoji: '🗄️', bc: 'border-green-500/30 bg-green-500/8', tc: 'text-green-300',  reason: 'Serverless Postgres, no cold starts, pay-per-query. Lead capture + analytics events.' },
-  { name: 'Vercel',      version: '—',         emoji: '▲',  bc: 'border-slate-500/30 bg-slate-500/8', tc: 'text-slate-300',  reason: 'Zero-config Astro SSR, preview URLs per commit, 40-region CDN, instant rollbacks.' },
-  { name: 'Vite',        version: '6.x',       emoji: '⚡', bc: 'border-yellow-500/30 bg-yellow-500/8',tc:'text-yellow-300',  reason: 'Sub-second HMR, optimized production bundles with tree-shaking, PWA plugin.' },
+  { name: 'Astro 5',       version: '5.x',       emoji: '🚀', reason: 'Zero-JS islands — only hydrates components that need interactivity. Static HTML for everything else.' },
+  { name: 'React 19',      version: '19.x',      emoji: '⚛️', reason: 'Concurrent features, stable use() hook. Island architecture is a natural fit for the desktop pattern.' },
+  { name: 'TypeScript',    version: '5.7',       emoji: '🔷', reason: 'AppId union type prevents invalid window opens at compile time. WindowPayload index enables flexible payloads.' },
+  { name: 'Tailwind CSS',  version: '4.x',       emoji: '🎨', reason: 'Zero dead CSS in production. Design tokens via CSS variables, utility-first theming.' },
+  { name: 'Framer Motion', version: '12.x',      emoji: '✨', reason: 'Spring physics for the virtual cursor, window drag, boot animation, and all transitions.' },
+  { name: 'Zustand 5',    version: '5.x',       emoji: '🐻', reason: 'getState() outside React — tour script and copilot dispatch without hooks or context.' },
+  { name: 'Groq SDK',     version: '0.x',       emoji: '🤖', reason: 'llama-3.3-70b at ~300ms. 10× cheaper than GPT-4 for equivalent conversational quality.' },
+  { name: 'Neon Postgres', version: 'serverless',emoji: '🗄️', reason: 'Serverless Postgres with no cold starts. Lead capture, analytics events, branching for dev environments.' },
+  { name: 'Vercel',       version: '—',         emoji: '▲',  reason: 'Zero-config Astro SSR, preview URLs per commit, 40-region CDN, instant rollbacks.' },
+  { name: 'Vite',         version: '6.x',       emoji: '⚡', reason: 'Sub-second HMR, optimized production bundles with tree-shaking, PWA plugin.' },
 ];
 
 function TechStackSection() {
   const [selected, setSelected] = useState<string | null>(null);
   return (
     <div>
-      <SectionHeader title="Tech Stack" subtitle="Click any card to see why it was chosen" />
-      <div className="grid grid-cols-2 gap-2">
-        {TECH.map((t, i) => (
-          <motion.button key={t.name} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
-            onClick={() => setSelected(selected === t.name ? null : t.name)}
-            className={`text-left rounded-xl border p-3 transition-all hover:brightness-125 ${t.bc}`}>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-base leading-none">{t.emoji}</span>
-              <span className={`text-xs font-semibold ${t.tc}`}>{t.name}</span>
-              <span className="text-[9px] text-white/20 font-mono ml-auto">{t.version}</span>
-            </div>
-            <AnimatePresence mode="wait">
+      <SectionHeader title="Tech Stack" subtitle="Click any row to see the reason it was chosen" />
+      <Group label="Libraries & Services">
+        {TECH.map((t, i, arr) => (
+          <div key={t.name}>
+            <button onClick={() => setSelected(selected === t.name ? null : t.name)}
+              className="w-full flex items-center gap-3 px-4 py-[11px] text-left hover:bg-white/[0.04] transition-colors">
+              <span className="text-[18px] leading-none w-7 text-center">{t.emoji}</span>
+              <div className="flex-1">
+                <p className="text-[13px] text-white">{t.name}</p>
+                {selected === t.name && (
+                  <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0 }}
+                    className="text-[11px] text-[rgba(235,235,245,0.45)] mt-1 leading-relaxed">
+                    {t.reason}
+                  </motion.p>
+                )}
+              </div>
+              <span className="text-[11px] font-mono text-[rgba(235,235,245,0.3)] shrink-0">{t.version}</span>
               {selected === t.name
-                ? <motion.p key="full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[10px] text-white/55 leading-relaxed">{t.reason}</motion.p>
-                : <p className="text-[10px] text-white/22 truncate">{t.reason.slice(0, 48)}…</p>
-              }
-            </AnimatePresence>
-          </motion.button>
+                ? <BsChevronDown size={10} className="text-white/25 shrink-0" />
+                : <BsChevronRight size={10} className="text-white/25 shrink-0" />}
+            </button>
+          </div>
         ))}
-      </div>
+      </Group>
     </div>
   );
 }
@@ -440,9 +497,7 @@ function PerformanceSection() {
       if (!alive) return;
       frames.current++;
       if (now - lastRef.current >= 1000) {
-        setFps(frames.current);
-        frames.current = 0;
-        lastRef.current = now;
+        setFps(frames.current); frames.current = 0; lastRef.current = now;
         const mem = (performance as { memory?: { usedJSHeapSize: number } }).memory;
         if (mem) setMemMB(Math.round(mem.usedJSHeapSize / 1024 / 1024));
       }
@@ -453,58 +508,60 @@ function PerformanceSection() {
     return () => { alive = false; cancelAnimationFrame(rafRef.current); };
   }, []);
 
-  const fpsColor = fps >= 55 ? 'text-emerald-400' : fps >= 30 ? 'text-amber-400' : fps > 0 ? 'text-rose-400' : 'text-white/30';
-
-  const metrics = [
-    { label: 'FPS', value: fps > 0 ? `${fps}` : '—', sub: 'requestAnimationFrame', color: fpsColor, live: true },
-    { label: 'JS Heap', value: memMB != null ? `${memMB} MB` : 'N/A', sub: 'usedJSHeapSize (Chrome only)', color: 'text-sky-400', live: memMB != null },
-    { label: 'Open Windows', value: `${windowCount}`, sub: 'active window states', color: 'text-violet-400', live: true },
-    { label: 'Bundle (min)', value: '559 KB', sub: '175 KB gzipped', color: 'text-amber-400', live: false },
-    { label: 'AI Latency', value: '~300ms', sub: 'median Groq inference', color: 'text-orange-400', live: false },
-    { label: 'TTI', value: '< 1.2s', sub: 'time-to-interactive', color: 'text-green-400', live: false },
-  ];
-
-  const chunks = [
-    { label: 'AppLayout (main)', kb: 559, color: 'bg-violet-500' },
-    { label: 'PDF Viewer', kb: 430, color: 'bg-sky-500' },
-    { label: 'Analytics Dashboard', kb: 368, color: 'bg-amber-500' },
-    { label: 'Architecture Viewer', kb: 169, color: 'bg-emerald-500' },
-  ];
+  const fpsColor = fps >= 55 ? 'text-[#34C759]' : fps >= 30 ? 'text-[#FF9F0A]' : fps > 0 ? 'text-[#FF453A]' : 'text-white/30';
 
   return (
     <div>
-      <SectionHeader title="Performance" subtitle="Live browser metrics + build stats" />
-      <div className="grid grid-cols-2 gap-2.5 mb-5">
-        {metrics.map((m, i) => (
-          <motion.div key={m.label} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
-            <Card>
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-[9px] uppercase tracking-wider text-white/25">{m.label}</p>
-                {m.live && <span className="flex items-center gap-1 text-[8px] text-emerald-400"><BsCircleFill size={4} className="animate-pulse" />LIVE</span>}
-              </div>
-              <p className={`text-xl font-bold ${m.color}`}>{m.value}</p>
-              <p className="text-[9px] text-white/25 mt-0.5">{m.sub}</p>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-      <Card>
-        <p className="text-[9px] uppercase tracking-wider text-white/25 mb-3">Largest Bundle Chunks</p>
-        <div className="space-y-2.5">
-          {chunks.map(c => (
+      <SectionHeader title="Performance" subtitle="Live browser metrics and build statistics" />
+
+      <Group label="Live Metrics">
+        <div className="flex items-center gap-3 px-4 py-[11px]">
+          <p className="flex-1 text-[13px] text-white">Frame Rate</p>
+          <span className="flex items-center gap-1.5 text-[10px] text-[#34C759]"><BsCircleFill size={5} className="animate-pulse" />LIVE</span>
+          <span className={`text-[13px] font-mono ml-2 ${fpsColor}`}>{fps > 0 ? `${fps} fps` : '—'}</span>
+        </div>
+        <div className="flex items-center gap-3 px-4 py-[11px]">
+          <p className="flex-1 text-[13px] text-white">JS Heap</p>
+          {memMB != null && <span className="flex items-center gap-1.5 text-[10px] text-[#34C759]"><BsCircleFill size={5} className="animate-pulse" />LIVE</span>}
+          <span className="text-[13px] font-mono ml-2 text-[rgba(235,235,245,0.45)]">{memMB != null ? `${memMB} MB` : 'N/A (Firefox)'}</span>
+        </div>
+        <div className="flex items-center gap-3 px-4 py-[11px]">
+          <p className="flex-1 text-[13px] text-white">Open Windows</p>
+          <span className="flex items-center gap-1.5 text-[10px] text-[#34C759]"><BsCircleFill size={5} className="animate-pulse" />LIVE</span>
+          <span className="text-[13px] font-mono ml-2 text-[rgba(235,235,245,0.45)]">{windowCount}</span>
+        </div>
+      </Group>
+
+      <Group label="Build Stats">
+        <Row label="Bundle (minified)" value="559 KB" />
+        <Row label="Bundle (gzipped)"  value="175 KB" />
+        <Row label="AI Response Time"  value="~300ms median" />
+        <Row label="Time-to-Interactive" value="< 1.2s" />
+        <Row label="Build Time"        value="~25s (Vercel)" />
+      </Group>
+
+      <p className="text-[11px] font-semibold text-[rgba(235,235,245,0.4)] uppercase tracking-wider mb-1.5 px-1">Largest Chunks</p>
+      <div className="rounded-xl bg-[#2C2C2E] p-4">
+        <div className="space-y-3">
+          {[
+            { label: 'AppLayout (main)',      kb: 559, color: 'bg-[#BF5AF2]' },
+            { label: 'PDF Viewer',            kb: 430, color: 'bg-[#0A84FF]' },
+            { label: 'Analytics Dashboard',   kb: 368, color: 'bg-[#FF9F0A]' },
+            { label: 'Architecture Viewer',   kb: 169, color: 'bg-[#34C759]' },
+          ].map(c => (
             <div key={c.label}>
-              <div className="flex justify-between text-[9px] text-white/40 mb-1">
-                <span>{c.label}</span>
-                <span className="font-mono">{c.kb} KB</span>
+              <div className="flex justify-between text-[11px] mb-1.5">
+                <span className="text-[rgba(235,235,245,0.55)]">{c.label}</span>
+                <span className="text-[rgba(235,235,245,0.35)] font-mono">{c.kb} KB</span>
               </div>
-              <div className="h-1.5 bg-white/8 rounded-full overflow-hidden">
+              <div className="h-1 bg-white/[0.08] rounded-full overflow-hidden">
                 <motion.div initial={{ width: 0 }} animate={{ width: `${Math.round(c.kb / 559 * 100)}%` }}
-                  transition={{ duration: 0.9, delay: 0.2 }} className={`h-full rounded-full ${c.color}`} />
+                  transition={{ duration: 0.9, delay: 0.15 }} className={`h-full rounded-full ${c.color}`} />
               </div>
             </div>
           ))}
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
@@ -512,35 +569,37 @@ function PerformanceSection() {
 // ── Security ───────────────────────────────────────────────────────────────────
 
 function SecuritySection() {
-  const steps = [
-    { icon: '🔒', label: 'Lock Screen Guard', desc: 'All content gated behind session unlock. Persisted via sessionStorage.', c: 'border-white/15 bg-white/5' },
-    { icon: '🪪', label: 'Google / GitHub OAuth', desc: 'Required before Copilot access. Token exchange happens server-side only.', c: 'border-sky-500/30 bg-sky-500/10' },
-    { icon: '🛡️', label: 'Server-Side Token Validation', desc: 'API route validates token with provider. Browser never touches OAuth secrets.', c: 'border-violet-500/30 bg-violet-500/10' },
-    { icon: '🔑', label: 'Deterministic User Hash', desc: 'HMAC(APP_SECRET + user_id) creates an anonymous identifier for rate limiting. No PII stored.', c: 'border-amber-500/30 bg-amber-500/10' },
-    { icon: '⏱️', label: 'Per-User Rate Limit: 30 req/day', desc: 'Enforced server-side per hash. Prevents abuse without tracking personal data.', c: 'border-orange-500/30 bg-orange-500/10' },
-    { icon: '🚦', label: 'Global Daily Cap: 50 API calls', desc: 'Hard server ceiling on total Groq calls per day — cost protection regardless of users.', c: 'border-rose-500/30 bg-rose-500/10' },
-    { icon: '🏰', label: 'Backend-Only Secrets', desc: 'GROQ_API_KEY, SARVAM_API_KEY, DATABASE_URL live in Vercel env vars — never bundled.', c: 'border-emerald-500/30 bg-emerald-500/10' },
-  ];
   return (
     <div>
-      <SectionHeader title="Security" subtitle="Auth flow, rate limiting, and secret protection" />
-      <div className="space-y-1.5">
-        {steps.map((s, i) => (
-          <div key={s.label} className="flex flex-col items-center">
-            <motion.div initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: i * 0.07 }}
-              className={`w-full rounded-xl border p-3 ${s.c}`}>
-              <div className="flex items-start gap-2.5">
-                <span className="text-base shrink-0">{s.icon}</span>
-                <div>
-                  <p className="text-xs font-semibold text-white">{s.label}</p>
-                  <p className="text-[10px] text-white/45 mt-0.5 leading-relaxed">{s.desc}</p>
-                </div>
-              </div>
-            </motion.div>
-            {i < steps.length - 1 && <FlowArrow />}
-          </div>
-        ))}
+      <SectionHeader title="Security" subtitle="Authentication, rate limiting, and secret protection" />
+
+      <p className="text-[11px] font-semibold text-[rgba(235,235,245,0.4)] uppercase tracking-wider mb-1.5 px-1">Auth Flow</p>
+      <div className="rounded-xl bg-[#2C2C2E] p-4 mb-5">
+        <div className="flex flex-col items-center">
+          {[
+            { title: 'Lock Screen Guard',         sub: 'All content gated — persisted via sessionStorage' },
+            { title: 'Google / GitHub OAuth',     sub: 'Required before Copilot access. Token exchange server-side only.' },
+            { title: 'Server-Side Validation',    sub: 'Astro API route validates token. Browser never touches OAuth secrets.' },
+            { title: 'Deterministic User Hash',   sub: 'HMAC(APP_SECRET + user_id) → anonymous rate-limit identifier. No PII stored.' },
+            { title: 'Rate Limit: 30 req / day', sub: 'Per-user hash enforced server-side. Blocks abuse without tracking.' },
+            { title: 'Global Cap: 50 API calls', sub: 'Hard ceiling on total Groq calls per day — cost protection.' },
+          ].map((step, i, arr) => (
+            <div key={step.title} className="w-full flex flex-col items-center">
+              <motion.div initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.07 }} className="w-full">
+                <FlowNode title={step.title} sub={step.sub} />
+              </motion.div>
+              {i < arr.length - 1 && <Connector />}
+            </div>
+          ))}
+        </div>
       </div>
+
+      <Group label="Secret Protection">
+        <Row label="GROQ_API_KEY"    sub="LLM inference key"         badge={{ text: 'Server only', color: 'bg-[#1A3028] text-[#34C759]' }} />
+        <Row label="SARVAM_API_KEY" sub="TTS synthesis key"          badge={{ text: 'Server only', color: 'bg-[#1A3028] text-[#34C759]' }} />
+        <Row label="DATABASE_URL"   sub="Neon Postgres connection"   badge={{ text: 'Server only', color: 'bg-[#1A3028] text-[#34C759]' }} />
+        <Row label="APP_SECRET"     sub="HMAC signing key"           badge={{ text: 'Server only', color: 'bg-[#1A3028] text-[#34C759]' }} />
+      </Group>
     </div>
   );
 }
@@ -548,62 +607,51 @@ function SecuritySection() {
 // ── AI Cost Optimization ───────────────────────────────────────────────────────
 
 function CostOptimizationSection() {
-  const bars = [
-    { label: 'Offline NLP', pct: 70, cost: '$0.00 / query', color: 'bg-emerald-500/50', tc: 'text-emerald-400' },
-    { label: 'Groq API fallback', pct: 30, cost: '~$0.0002 / query', color: 'bg-orange-500/50', tc: 'text-orange-400' },
-  ];
-  const stats = [
-    { label: 'Max daily cost', value: '< $0.01', sub: '50 calls × $0.0002', c: 'text-emerald-400' },
-    { label: 'Model', value: 'llama-3.3-70b', sub: '$0.59 / 1M tokens (Groq)', c: 'text-orange-300' },
-    { label: 'Avg tokens / query', value: '~300', sub: 'input + output combined', c: 'text-sky-400' },
-    { label: 'Daily API cap', value: '50 calls', sub: 'hard server limit', c: 'text-amber-400' },
-  ];
-  const offline = [
-    'Navigation: open/close/show/launch commands',
-    'Greetings and identity questions',
-    'App intents with known action mapping',
-    'Simple info queries from local config data',
-  ];
   return (
     <div>
       <SectionHeader title="AI Cost Optimization" subtitle="Offline-first NLP with smart Groq fallback" />
-      <Card className="mb-4">
-        <p className="text-[9px] uppercase tracking-wider text-white/25 mb-4">Query Traffic Split</p>
-        <div className="space-y-3">
-          {bars.map(b => (
+
+      <p className="text-[11px] font-semibold text-[rgba(235,235,245,0.4)] uppercase tracking-wider mb-1.5 px-1">Query Traffic Split</p>
+      <div className="rounded-xl bg-[#2C2C2E] p-4 mb-5">
+        <div className="space-y-3.5">
+          {[
+            { label: 'Offline NLP',    pct: 70, color: 'bg-[#34C759]', tc: 'text-[#34C759]', cost: '$0.00 per query' },
+            { label: 'Groq API',       pct: 30, color: 'bg-[#FF9F0A]', tc: 'text-[#FF9F0A]', cost: '~$0.0002 per query' },
+          ].map(b => (
             <div key={b.label}>
-              <div className="flex justify-between text-[10px] mb-1">
+              <div className="flex justify-between text-[12px] mb-1.5">
                 <span className={b.tc}>{b.label}</span>
-                <span className="text-white/40">{b.pct}% · {b.cost}</span>
+                <span className="text-[rgba(235,235,245,0.4)]">{b.pct}% · {b.cost}</span>
               </div>
-              <div className="h-5 bg-white/8 rounded-lg overflow-hidden">
+              <div className="h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
                 <motion.div initial={{ width: 0 }} animate={{ width: `${b.pct}%` }}
-                  transition={{ duration: 1, delay: 0.2 }} className={`h-full rounded-lg ${b.color}`} />
+                  transition={{ duration: 1, delay: 0.2 }} className={`h-full rounded-full ${b.color}`} />
               </div>
             </div>
           ))}
         </div>
-      </Card>
-      <div className="grid grid-cols-2 gap-2.5 mb-4">
-        {stats.map(m => (
-          <Card key={m.label}>
-            <p className="text-[9px] uppercase tracking-wider text-white/25">{m.label}</p>
-            <p className={`text-sm font-bold mt-1 ${m.c}`}>{m.value}</p>
-            <p className="text-[9px] text-white/25 mt-0.5">{m.sub}</p>
-          </Card>
-        ))}
       </div>
-      <Card>
-        <p className="text-[9px] uppercase tracking-wider text-white/25 mb-2.5">Offline NLP Covers</p>
-        <div className="space-y-1.5">
-          {offline.map(o => (
-            <div key={o} className="flex items-center gap-2">
-              <BsCheck2 size={10} className="text-emerald-400 shrink-0" />
-              <span className="text-[10px] text-white/55">{o}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
+
+      <Group label="Cost Model">
+        <Row label="Max Daily Cost"     value="< $0.01"       sub="50 calls × $0.0002" />
+        <Row label="Model"              value="llama-3.3-70b" sub="$0.59 / 1M input tokens (Groq)" />
+        <Row label="Avg Tokens / Query" value="~300"          sub="input + output combined" />
+        <Row label="Daily API Cap"      value="50 calls"      sub="Hard server limit — cost protection" />
+      </Group>
+
+      <Group label="Offline NLP Handles">
+        {[
+          'Navigation commands (open, show, close, launch)',
+          'Greetings and identity questions',
+          'App intents with known action mapping',
+          'Simple info queries answered from local config',
+        ].map(o => (
+          <div key={o} className="flex items-center gap-3 px-4 py-[11px]">
+            <BsCheck2 size={11} className="text-[#34C759] shrink-0" />
+            <span className="text-[13px] text-[rgba(235,235,245,0.7)]">{o}</span>
+          </div>
+        ))}
+      </Group>
     </div>
   );
 }
@@ -611,19 +659,19 @@ function CostOptimizationSection() {
 // ── Version History ────────────────────────────────────────────────────────────
 
 const VERSIONS = [
-  { v: 'v1.1', date: 'Jul 2026', label: 'Developer Settings', bg: 'bg-violet-500', tc: 'text-violet-400', current: true,
-    features: ['Developer Settings app (this!)', 'Sarvam TTS tour narration', 'Camera watermark with favicon', 'Centered boot copilot window', 'Custom SVG desktop icons'] },
-  { v: 'v1.0', date: 'Jun 2026', label: 'Guided Tour', bg: 'bg-indigo-500', tc: 'text-indigo-400',
-    features: ['9-step automated recruiter tour', 'Virtual cursor with spring physics', 'TourNotification popup (10s delay)', 'Final CTA overlay (email + resume)'] },
-  { v: 'v0.9', date: 'May 2026', label: 'Security Layer', bg: 'bg-sky-500', tc: 'text-sky-400',
+  { v: 'v1.1', date: 'Jul 2026', label: 'Developer Settings', dot: 'bg-[#BF5AF2]', current: true,
+    features: ['Developer Settings app (this!)', 'Sarvam TTS tour narration', 'Camera watermark with favicon', 'Centered boot copilot', 'Custom SVG desktop icons'] },
+  { v: 'v1.0', date: 'Jun 2026', label: 'Guided Tour',        dot: 'bg-[#0A84FF]',
+    features: ['9-step automated recruiter tour', 'Virtual cursor with spring physics', 'TourNotification popup (10s delay)', 'Final CTA with email + resume download'] },
+  { v: 'v0.9', date: 'May 2026', label: 'Security Layer',     dot: 'bg-[#34C759]',
     features: ['Google + GitHub OAuth gate', 'Server-side rate limiting', 'Daily API cap enforcement', 'Deterministic HMAC user hashing'] },
-  { v: 'v0.8', date: 'Apr 2026', label: 'AI Copilot', bg: 'bg-emerald-500', tc: 'text-emerald-400',
-    features: ['Offline NLP parser', 'Groq llama-3.3-70b fallback', 'Confidence scoring system', 'OS action execution pipeline'] },
-  { v: 'v0.6', date: 'Feb 2026', label: 'App Suite', bg: 'bg-amber-500', tc: 'text-amber-400',
+  { v: 'v0.8', date: 'Apr 2026', label: 'AI Copilot',         dot: 'bg-[#FF9F0A]',
+    features: ['Offline NLP parser', 'Groq llama-3.3-70b fallback', 'Confidence scoring (0.7 threshold)', 'OS action execution pipeline'] },
+  { v: 'v0.6', date: 'Feb 2026', label: 'App Suite',          dot: 'bg-[#FF453A]',
     features: ['Photos gallery + lightbox', 'HackathonRush pixel game', 'Founder HQ + Research Center', 'Analytics Dashboard'] },
-  { v: 'v0.3', date: 'Nov 2025', label: 'OS Foundation', bg: 'bg-orange-600', tc: 'text-orange-400',
-    features: ['Window manager + drag/resize', 'Dock 2.0 with bounce animation', 'Boot sequence animation', 'Spotlight search', 'MacToolbar + keyboard shortcuts'] },
-  { v: 'v0.1', date: 'Sep 2025', label: 'Initial Concept', bg: 'bg-white/30', tc: 'text-white/50',
+  { v: 'v0.3', date: 'Nov 2025', label: 'OS Foundation',      dot: 'bg-[#FF6B60]',
+    features: ['Window manager + drag/resize', 'Dock 2.0 with bounce', 'Boot sequence animation', 'Spotlight search + keyboard shortcuts'] },
+  { v: 'v0.1', date: 'Sep 2025', label: 'Initial Concept',    dot: 'bg-white/30',
     features: ['macOS-style terminal portfolio', 'Basic window system', 'Astro 5 + React 19 setup'] },
 ];
 
@@ -631,54 +679,48 @@ function VersionHistorySection() {
   const [expanded, setExpanded] = useState<string | null>('v1.1');
   return (
     <div>
-      <SectionHeader title="Version History" subtitle="Major releases and milestones" />
-      <div className="relative">
-        <div className="absolute left-4 top-2 bottom-2 w-px bg-white/10" />
-        <div className="space-y-1 pl-2">
-          {VERSIONS.map((v, i) => (
-            <motion.div key={v.v} initial={{ x: -8, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: i * 0.06 }}>
-              <button onClick={() => setExpanded(expanded === v.v ? null : v.v)} className="w-full text-left">
-                <div className="flex items-center gap-2.5 py-1 px-1">
-                  <div className={`w-3 h-3 rounded-full shrink-0 ml-1.5 ${v.bg} ${v.current ? 'ring-2 ring-white/25 ring-offset-1 ring-offset-[#1c1c1e]' : ''}`} />
-                  <span className="font-mono text-xs font-bold text-white/75">{v.v}</span>
-                  <span className="text-xs text-white/50">{v.label}</span>
-                  {v.current && <span className="text-[9px] px-1.5 py-0.5 rounded bg-violet-500/25 text-violet-300">current</span>}
-                  <span className="text-[9px] text-white/20 ml-auto">{v.date}</span>
-                  {expanded === v.v ? <BsChevronDown size={8} className="text-white/25" /> : <BsChevronRight size={8} className="text-white/25" />}
-                </div>
-              </button>
-              <AnimatePresence>
-                {expanded === v.v && (
-                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                    <div className="ml-8 mb-1 p-2.5 rounded-lg bg-white/5 border border-white/8">
-                      <div className="space-y-1">
-                        {v.features.map(f => (
-                          <div key={f} className="flex items-center gap-1.5">
-                            <BsCheck2 size={9} className={`shrink-0 ${v.tc}`} />
-                            <span className="text-[10px] text-white/55">{f}</span>
-                          </div>
-                        ))}
+      <SectionHeader title="Version History" subtitle="Major releases and feature milestones" />
+      <Group>
+        {VERSIONS.map((v) => (
+          <div key={v.v}>
+            <button onClick={() => setExpanded(expanded === v.v ? null : v.v)}
+              className="w-full flex items-center gap-3 px-4 py-[11px] text-left hover:bg-white/[0.04] transition-colors">
+              <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${v.dot} ${v.current ? 'ring-2 ring-white/20 ring-offset-1 ring-offset-[#2C2C2E]' : ''}`} />
+              <span className="font-mono text-[12px] font-semibold text-[rgba(235,235,245,0.6)] w-10 shrink-0">{v.v}</span>
+              <span className="text-[13px] text-white flex-1">{v.label}</span>
+              {v.current && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#1C2A3C] text-[#0A84FF]">Current</span>}
+              <span className="text-[11px] text-[rgba(235,235,245,0.25)]">{v.date}</span>
+              {expanded === v.v ? <BsChevronDown size={10} className="text-white/25" /> : <BsChevronRight size={10} className="text-white/25" />}
+            </button>
+            <AnimatePresence>
+              {expanded === v.v && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden border-t border-white/[0.06]">
+                  <div className="px-4 py-3 space-y-1.5">
+                    {v.features.map(f => (
+                      <div key={f} className="flex items-center gap-2.5">
+                        <BsCheck2 size={10} className={`shrink-0 ${v.dot.replace('bg-', 'text-')}`} />
+                        <span className="text-[12px] text-[rgba(235,235,245,0.55)]">{f}</span>
                       </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ))}
+      </Group>
     </div>
   );
 }
 
-// ── Main Component ─────────────────────────────────────────────────────────────
+// ── Main ───────────────────────────────────────────────────────────────────────
 
 export default function DeveloperSettings({ payload }: AppWindowProps) {
   const [active, setActive] = useState<SectionId>((payload?.section as SectionId) ?? 'architecture');
   const [search, setSearch] = useState('');
 
-  const filtered = SECTIONS.filter(s =>
-    search === '' || s.label.toLowerCase().includes(search.toLowerCase())
+  const filtered = SECTIONS.filter(
+    (s) => search === '' || s.label.toLowerCase().includes(search.toLowerCase())
   );
 
   const renderSection = (id: SectionId) => {
@@ -697,41 +739,38 @@ export default function DeveloperSettings({ payload }: AppWindowProps) {
   };
 
   return (
-    <div className="flex h-full overflow-hidden bg-[#1c1c1e] text-white">
+    <div className="flex h-full overflow-hidden" style={{ background: '#1C1C1E', color: '#FFFFFF' }}>
       {/* Sidebar */}
-      <div className="w-52 shrink-0 border-r border-white/8 flex flex-col bg-[#242426]">
-        <div className="p-3 pb-1.5">
-          <div className="flex items-center gap-2 bg-white/8 rounded-lg px-2.5 py-1.5">
-            <BsSearch size={10} className="text-white/30 shrink-0" />
-            <input
-              type="text"
-              placeholder="Search"
-              value={search}
+      <div className="w-56 shrink-0 border-r border-white/[0.07] flex flex-col" style={{ background: '#242426' }}>
+        {/* Search */}
+        <div className="px-3 pt-3 pb-2">
+          <div className="flex items-center gap-2 rounded-[8px] px-2.5 py-1.5" style={{ background: 'rgba(255,255,255,0.09)' }}>
+            <BsSearch size={11} className="text-white/30 shrink-0" />
+            <input type="text" placeholder="Search" value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-transparent text-[11px] text-white/80 placeholder-white/25 outline-none w-full"
+              className="bg-transparent text-[12px] placeholder-white/25 outline-none w-full"
+              style={{ color: 'rgba(235,235,245,0.85)' }}
             />
           </div>
         </div>
-        <div className="px-3 pb-2 pt-1">
-          <p className="text-[9px] uppercase tracking-widest text-white/20 font-semibold">Developer Mode</p>
-        </div>
-        <div className="flex-1 overflow-y-auto no-scrollbar px-2 pb-3 space-y-0.5">
+
+        {/* Nav */}
+        <div className="flex-1 overflow-y-auto no-scrollbar px-2 pb-3">
           {filtered.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setActive(s.id)}
-              className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-all text-left ${
-                active === s.id
-                  ? 'bg-white/14 text-white font-medium'
-                  : 'text-white/50 hover:bg-white/7 hover:text-white/75'
-              }`}
-            >
-              <s.Icon size={12} className={active === s.id ? 'text-white' : 'text-white/35'} />
-              {s.label}
+            <button key={s.id} onClick={() => setActive(s.id)}
+              className={`w-full flex items-center gap-2.5 px-2 py-[7px] rounded-[8px] text-left transition-colors mb-0.5 ${
+                active === s.id ? 'bg-white/[0.12]' : 'hover:bg-white/[0.05]'
+              }`}>
+              <div className={`w-[26px] h-[26px] rounded-[7px] flex items-center justify-center shrink-0 ${s.iconBg}`}>
+                <s.Icon size={13} className="text-white" />
+              </div>
+              <span className={`text-[12px] leading-tight ${active === s.id ? 'text-white font-medium' : 'text-[rgba(235,235,245,0.6)]'}`}>
+                {s.label}
+              </span>
             </button>
           ))}
           {filtered.length === 0 && (
-            <p className="text-[10px] text-white/20 px-2.5 py-4 italic">No results for "{search}"</p>
+            <p className="text-[11px] text-white/20 px-2.5 py-4 italic">No results for "{search}"</p>
           )}
         </div>
       </div>
@@ -739,14 +778,10 @@ export default function DeveloperSettings({ payload }: AppWindowProps) {
       {/* Content */}
       <div className="flex-1 overflow-y-auto no-scrollbar">
         <AnimatePresence mode="wait">
-          <motion.div
-            key={active}
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -8 }}
-            transition={{ duration: 0.15 }}
-            className="p-6"
-          >
+          <motion.div key={active}
+            initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }}
+            transition={{ duration: 0.14, ease: 'easeOut' }}
+            className="p-6 max-w-[620px]">
             {renderSection(active)}
           </motion.div>
         </AnimatePresence>
