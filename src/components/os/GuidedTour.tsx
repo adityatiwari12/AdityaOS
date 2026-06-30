@@ -85,7 +85,11 @@ export default function GuidedTour() {
   const cursorRef = useRef<CursorHandle | null>(null);
   const cancelRef = useRef({ cancelled: false });
 
-  // Stop TTS when tour ends or user skips
+  // Stop TTS immediately when user mutes or tour ends
+  useEffect(() => {
+    if (muted) stopAudio();
+  }, [muted]);
+
   useEffect(() => {
     if (!running) stopAudio();
   }, [running]);
