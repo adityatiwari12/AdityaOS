@@ -61,6 +61,7 @@ function drawWatermark(ctx: CanvasRenderingContext2D, width: number, height: num
 export default function Camera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const logoRef = useRef<HTMLImageElement | null>(null);
   const [facing, setFacing] = useState<'user' | 'environment'>('user');
@@ -71,7 +72,8 @@ export default function Camera() {
 
   useEffect(() => {
     const img = new Image();
-    img.src = '/appicon.png';
+    img.crossOrigin = 'anonymous';
+    img.src = 'https://github.com/adityatiwari12.png';
     img.onload = () => { logoRef.current = img; };
   }, []);
 
@@ -86,7 +88,7 @@ export default function Camera() {
     stopStream();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: facing },
+        video: { facingMode: facing, width: { ideal: 1920 }, height: { ideal: 1080 } },
         audio: false,
       });
       streamRef.current = stream;
@@ -108,16 +110,30 @@ export default function Camera() {
   const capture = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (!video || !canvas) return;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    const container = containerRef.current;
+    if (!video || !canvas || !container) return;
+
+    // Crop to match the on-screen object-cover framing, not the raw sensor frame.
+    const targetAspect = container.clientWidth / container.clientHeight;
+    const videoAspect = video.videoWidth / video.videoHeight;
+    let sx = 0, sy = 0, sw = video.videoWidth, sh = video.videoHeight;
+    if (videoAspect > targetAspect) {
+      sw = video.videoHeight * targetAspect;
+      sx = (video.videoWidth - sw) / 2;
+    } else {
+      sh = video.videoWidth / targetAspect;
+      sy = (video.videoHeight - sh) / 2;
+    }
+
+    canvas.width = sw;
+    canvas.height = sh;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     if (facing === 'user') {
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
     }
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
     drawWatermark(ctx, canvas.width, canvas.height, logoRef.current);
     setPhoto(canvas.toDataURL('image/png'));
     setFlash(true);
@@ -138,7 +154,7 @@ export default function Camera() {
   };
 
   return (
-    <div className="h-full w-full bg-black flex flex-col items-center justify-center relative overflow-hidden">
+    <div ref={containerRef} className="h-full w-full bg-black flex flex-col items-center justify-center relative overflow-hidden">
       <canvas ref={canvasRef} className="hidden" />
 
       {error ? (
@@ -152,14 +168,14 @@ export default function Camera() {
           </button>
         </div>
       ) : photo ? (
-        <img src={photo} alt="Captured" className="max-h-full max-w-full object-contain" />
+        <img src={photo} alt="Captured" className="h-full w-full object-cover" />
       ) : (
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
-          className="max-h-full max-w-full object-contain"
+          className="h-full w-full object-cover"
           style={{ transform: facing === 'user' ? 'scaleX(-1)' : undefined }}
         />
       )}
@@ -169,8 +185,8 @@ export default function Camera() {
 
       {/* Brand watermark badge */}
       {!error && (
-        <div className="absolute bottom-28 right-3 flex items-center gap-1.5 pl-1.5 pr-2.5 py-1.5 rounded-full bg-black/45 backdrop-blur-sm pointer-events-none select-none">
-          <img src="/appicon.png" alt="" className="w-6 h-6 rounded-lg object-cover" />
+        <div className="absolute bottom-3 right-3 flex items-center gap-1.5 pl-1.5 pr-2.5 py-1.5 rounded-full bg-black/45 backdrop-blur-sm pointer-events-none select-none">
+          <img src="https://github.com/adityatiwari12.png" alt="" className="w-6 h-6 rounded-lg object-cover" />
           <div className="leading-tight">
             <p className="text-white text-[11px] font-semibold">AdityaOS</p>
             <p className="text-white/70 text-[9px]">adityatiwari.work</p>
