@@ -300,8 +300,7 @@ const NotesApp = ({ isOpen, onClose, section }: NotesAppProps) => {
         const ADVANCED = new Set([
             'Next.js', 'FastAPI', 'Express.js', 'PostgreSQL', 'MongoDB', 'Docker',
             'Machine Learning', 'Deep Learning', 'React Native', 'OCR',
-            'Named Entity Recognition', 'CI/CD', 'Computer Vision', 'Firebase', 'Linux',
-            'Java',
+            'Named Entity Recognition', 'CI/CD', 'Computer Vision', 'Firebase',
         ]);
         // Everything else → Intermediate
 

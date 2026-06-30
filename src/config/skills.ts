@@ -8,7 +8,6 @@ export const skills: readonly string[] = [
   'Python',
   'TypeScript',
   'JavaScript',
-  'Java',
   'SQL',
   // AI / ML
   'LLMs',
@@ -33,7 +32,6 @@ export const skills: readonly string[] = [
   // DevOps
   'Docker',
   'Git',
-  'Linux',
   'CI/CD',
   // Product & Analytics
   'Figma',
