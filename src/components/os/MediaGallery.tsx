@@ -42,6 +42,7 @@ export default function MediaGallery({ items, initialIndex }: MediaGalleryProps)
             key={item.src}
             onClick={() => setActive(i)}
             whileHover={reduced ? undefined : { scale: 1.04, y: -2 }}
+            data-tour-gallery-thumb={i}
             className="group relative rounded-lg overflow-hidden border border-white/10 bg-white/5 aspect-square focus:outline-none focus:ring-2 focus:ring-orange-400"
             title={item.caption}
           >

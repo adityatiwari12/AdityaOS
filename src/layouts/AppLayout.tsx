@@ -9,6 +9,8 @@ import MobileHomeScreen from '../components/global/MobileHomeScreen';
 import LockScreen from '../components/global/LockScreen';
 import MobileNotification from '../components/global/MobileNotification';
 import WallpaperContextMenu from '../components/global/WallpaperContextMenu';
+import TourNotification from '../components/global/TourNotification';
+import GuidedTour from '../components/os/GuidedTour';
 import BootSequence from '../components/os/BootSequence';
 import DesktopWallpaper from '../components/os/DesktopWallpaper';
 import DesktopProfileWidget from '../components/os/DesktopProfileWidget';
@@ -113,8 +115,7 @@ export default function Desktop({ initialBg, backgroundMap }: AppLayoutProps) {
       openWindow('intro', 'Intro');
       return;
     }
-    openWindow('contributions', 'GitHub Activity');
-    openWindow('videos', 'Project Videos');
+    openWindow('terminal', 'AI Copilot');
     openWindow('intro', 'Intro');
   }, [booted, openWindow]);
 
@@ -255,6 +256,8 @@ export default function Desktop({ initialBg, backgroundMap }: AppLayoutProps) {
 
       {!locked && booted && <MobileNotification />}
       {booted && <WallpaperContextMenu onChangeWallpaper={shuffleBackground} />}
+      {booted && <TourNotification />}
+      {booted && <GuidedTour />}
 
       <CareerControlOverlay
         isOpen={isCareerControlOpen}

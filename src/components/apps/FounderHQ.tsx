@@ -20,7 +20,7 @@ export default function FounderHQ() {
         </a>
       </header>
 
-      <section className="rounded-xl bg-white/5 border border-white/10 p-5">
+      <section data-tour-id="fhq-tokenistt" className="rounded-xl bg-white/5 border border-white/10 p-5">
         <h2 className="text-lg font-semibold mb-2">What is Tokenistt?</h2>
         <p className="text-sm text-gray-300 leading-relaxed">
           In simple terms, Tokenistt is a startup I'm building together with my friends{' '}
@@ -53,7 +53,7 @@ export default function FounderHQ() {
         </div>
       </section>
 
-      <section>
+      <section data-tour-id="fhq-roadmap">
         <h2 className="text-lg font-semibold mb-3">Roadmap</h2>
         <div className="space-y-2">
           {founderHQ.roadmap.map((r) => (
@@ -66,7 +66,7 @@ export default function FounderHQ() {
         </div>
       </section>
 
-      <section>
+      <section data-tour-id="fhq-metrics">
         <h2 className="text-lg font-semibold mb-3">Metrics</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {founderHQ.metrics.map((m) => (
@@ -81,7 +81,7 @@ export default function FounderHQ() {
         </div>
       </section>
 
-      <section>
+      <section data-tour-id="fhq-traction">
         <h2 className="text-lg font-semibold mb-3">Traction</h2>
         <ul className="space-y-2 text-sm text-gray-400">
           {founderHQ.traction.map((t) => <li key={t}>• {t}</li>)}

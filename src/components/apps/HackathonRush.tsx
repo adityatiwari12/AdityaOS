@@ -75,108 +75,265 @@ interface Particle {
 
 interface AchievementItem { id: string; title: string; desc: string; }
 
-// ─── Sound Manager ────────────────────────────────────────────────────────────
-const SFX_KEYS = ['jump', 'pickup', 'damage', 'achievement', 'click'] as const;
-type SfxKey = (typeof SFX_KEYS)[number];
-const POOL_SIZE = 4;
+// ─── Sound Manager (Web Audio API — reliable across browsers) ─────────────────
+const SOUND_FILES: Record<string, string> = {
+  jump: '/sounds/jump.mp3',
+  pickup: '/sounds/pickup.mp3',
+  damage: '/sounds/damage.mp3',
+  achievement: '/sounds/achievement.mp3',
+  click: '/sounds/click.mp3',
+  music: '/sounds/soundtrack.mp3',
+};
+
+/** Shared prefetch so audio bytes are ready before the first tap. */
+const sharedPending = new Map<string, ArrayBuffer>();
+let sharedFetch: Promise<void> | null = null;
+
+function prefetchSoundFiles() {
+  if (typeof window === 'undefined') return Promise.resolve();
+  if (sharedFetch) return sharedFetch;
+  sharedFetch = Promise.all(
+    Object.entries(SOUND_FILES).map(async ([key, url]) => {
+      if (sharedPending.has(key)) return;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return;
+        sharedPending.set(key, await res.arrayBuffer());
+      } catch {
+        /* ignore */
+      }
+    }),
+  ).then(() => undefined);
+  return sharedFetch;
+}
+
+if (typeof window !== 'undefined') void prefetchSoundFiles();
 
 class SoundManager {
-  private music: HTMLAudioElement | null = null;
-  private sfxPools: Partial<Record<SfxKey, HTMLAudioElement[]>> = {};
-  private poolIndex: Partial<Record<SfxKey, number>> = {};
+  private ctx: AudioContext | null = null;
+  private master: GainNode | null = null;
+  private buffers = new Map<string, AudioBuffer>();
+  private pending = new Map<string, ArrayBuffer>();
+  private htmlSfx: Partial<Record<string, HTMLAudioElement[]>> = {};
+  private musicEl: HTMLAudioElement | null = null;
+  private fetched = false;
+  private decoded = false;
+  private primed = false;
   private muted = false;
-  private unlocked = false;
+  private musicNode: AudioBufferSourceNode | null = null;
+  private musicGain: GainNode | null = null;
+  private wantMusic = false;
+  private decodePromise: Promise<void> | null = null;
 
   load() {
-    for (const key of SFX_KEYS) {
-      this.sfxPools[key] = Array.from({ length: POOL_SIZE }, () => {
-        const a = new Audio(`/sounds/${key}.mp3`);
+    if (typeof window === 'undefined') return;
+    for (const key of ['jump', 'pickup', 'damage', 'achievement', 'click'] as const) {
+      this.htmlSfx[key] = Array.from({ length: 3 }, () => {
+        const a = new Audio(SOUND_FILES[key]);
         a.preload = 'auto';
-        a.volume = 0.45;
+        a.volume = 0.5;
         return a;
       });
-      this.poolIndex[key] = 0;
     }
-
-    this.music = new Audio('/sounds/soundtrack.mp3');
-    this.music.preload = 'auto';
-    this.music.loop = true;
-    this.music.volume = 0.3;
-  }
-
-  /** Must run inside a user gesture (tap / key) before audio can play. */
-  unlock() {
-    if (this.unlocked) return;
-    this.unlocked = true;
-
-    const unlockOne = (audio: HTMLAudioElement) => {
-      const vol = audio.volume;
-      audio.volume = 0;
-      const p = audio.play();
-      if (p) {
-        p.then(() => {
-          audio.pause();
-          audio.currentTime = 0;
-          audio.volume = vol;
-        }).catch(() => {
-          audio.volume = vol;
-        });
-      } else {
-        audio.volume = vol;
+    this.musicEl = new Audio(SOUND_FILES.music);
+    this.musicEl.preload = 'auto';
+    this.musicEl.loop = true;
+    this.musicEl.volume = 0.35;
+    void prefetchSoundFiles().then(() => {
+      for (const [key, data] of sharedPending) {
+        if (!this.pending.has(key)) this.pending.set(key, data);
       }
-    };
-
-    for (const pool of Object.values(this.sfxPools)) {
-      pool?.forEach(unlockOne);
-    }
-    if (this.music) unlockOne(this.music);
+      this.fetched = this.pending.size > 0;
+    });
   }
 
-  private playSfx(key: SfxKey) {
-    if (this.muted || !this.unlocked) return;
-    const pool = this.sfxPools[key];
+  private async fetchAll() {
+    if (this.fetched) return;
+    await prefetchSoundFiles();
+    for (const [key, data] of sharedPending) {
+      if (!this.pending.has(key)) this.pending.set(key, data);
+    }
+    this.fetched = this.pending.size > 0;
+    if (this.primed) await this.decodeAll();
+  }
+
+  private ensureContext(): boolean {
+    if (this.ctx) return true;
+    const Ctx = window.AudioContext ?? (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!Ctx) return false;
+    const ctx = new Ctx();
+    const master = ctx.createGain();
+    master.gain.value = 1;
+    master.connect(ctx.destination);
+    this.ctx = ctx;
+    this.master = master;
+    return true;
+  }
+
+  /** Unlock audio — call synchronously inside pointerdown / keydown. */
+  prime() {
+    this.primed = true;
+
+    // HTML audio unlock (mobile Safari) — real playback happens in startMusicNow().
+    if (this.musicEl) {
+      const m = this.musicEl;
+      const vol = m.volume;
+      m.volume = 0.001;
+      void m.play().then(() => {
+        m.pause();
+        m.currentTime = 0;
+        m.volume = vol;
+      }).catch(() => {
+        m.volume = vol;
+      });
+    }
+
+    if (this.ensureContext() && this.ctx && this.master) {
+      const silent = this.ctx.createBuffer(1, 1, this.ctx.sampleRate);
+      const tick = this.ctx.createBufferSource();
+      tick.buffer = silent;
+      tick.connect(this.master);
+      tick.start(0);
+      if (this.ctx.state === 'suspended') void this.ctx.resume();
+    }
+
+    if (!this.decodePromise) {
+      this.decodePromise = (async () => {
+        if (!this.fetched) await this.fetchAll();
+        await this.decodeAll();
+      })();
+    }
+    void this.decodePromise.then(() => {
+      if (this.wantMusic) this.startMusicNow();
+    });
+  }
+
+  private playHtmlSfx(key: string) {
+    if (this.muted || !this.primed) return;
+    const pool = this.htmlSfx[key as keyof typeof this.htmlSfx];
     if (!pool?.length) return;
-
-    const idx = this.poolIndex[key] ?? 0;
-    const audio = pool[idx % pool.length];
-    this.poolIndex[key] = (idx + 1) % pool.length;
-
+    const audio = pool.find((a) => a.paused || a.ended) ?? pool[0];
     audio.currentTime = 0;
     void audio.play().catch(() => {});
   }
 
-  jump() { this.playSfx('jump'); }
-  pickup() { this.playSfx('pickup'); }
-  damage() { this.playSfx('damage'); }
-  achievement() { this.playSfx('achievement'); }
-  click() { this.playSfx('click'); }
+  private async decodeAll() {
+    if (this.decoded || !this.ctx) return;
+    for (const [key, data] of this.pending) {
+      if (this.buffers.has(key)) continue;
+      try {
+        const copy = data.slice(0);
+        const buffer = await this.ctx.decodeAudioData(copy);
+        this.buffers.set(key, buffer);
+      } catch {
+        /* ignore corrupt clip */
+      }
+    }
+    this.decoded = this.buffers.size > 0;
+  }
+
+  private play(key: string, { loop = false, volume = 0.45 } = {}) {
+    if (this.muted || !this.decoded || !this.ctx || !this.master) return null;
+    const buffer = this.buffers.get(key);
+    if (!buffer) return null;
+
+    if (this.ctx.state === 'suspended') void this.ctx.resume();
+
+    const src = this.ctx.createBufferSource();
+    src.buffer = buffer;
+    src.loop = loop;
+    const gain = this.ctx.createGain();
+    gain.gain.value = volume;
+    src.connect(gain);
+    gain.connect(this.master);
+    src.start(0);
+    return { src, gain };
+  }
+
+  jump() { this.decoded ? this.play('jump') : this.playHtmlSfx('jump'); }
+  pickup() { this.decoded ? this.play('pickup') : this.playHtmlSfx('pickup'); }
+  damage() { this.decoded ? this.play('damage') : this.playHtmlSfx('damage'); }
+  achievement() { this.decoded ? this.play('achievement') : this.playHtmlSfx('achievement'); }
+  click() { this.decoded ? this.play('click') : this.playHtmlSfx('click'); }
 
   startMusic() {
-    if (this.muted || !this.unlocked || !this.music) return;
-    if (this.music.paused) void this.music.play().catch(() => {});
+    this.wantMusic = true;
+    if (this.primed) this.startMusicNow();
+  }
+
+  private startMusicNow() {
+    if (this.muted) return;
+
+    // Prefer HTML audio for looping soundtrack (most reliable).
+    if (this.musicEl) {
+      this.stopMusicInternal();
+      if (this.musicEl.paused) void this.musicEl.play().catch(() => {});
+      return;
+    }
+
+    if (!this.decoded || this.musicNode) return;
+    this.stopMusicInternal();
+    const nodes = this.play('music', { loop: true, volume: 0.35 });
+    if (!nodes) return;
+
+    this.musicNode = nodes.src;
+    this.musicGain = nodes.gain;
+    nodes.src.onended = () => {
+      if (this.musicNode === nodes.src) {
+        this.musicNode = null;
+        this.musicGain = null;
+      }
+    };
+  }
+
+  private stopMusicInternal() {
+    if (this.musicEl) {
+      this.musicEl.pause();
+      this.musicEl.currentTime = 0;
+    }
+    try {
+      this.musicNode?.stop();
+    } catch {
+      /* already stopped */
+    }
+    this.musicNode = null;
+    this.musicGain = null;
   }
 
   stopMusic() {
-    if (!this.music) return;
-    this.music.pause();
-    this.music.currentTime = 0;
+    this.wantMusic = false;
+    this.stopMusicInternal();
   }
 
   pauseMusic() {
-    this.music?.pause();
+    if (this.musicEl && !this.musicEl.paused) this.musicEl.pause();
+    else if (this.musicGain) this.musicGain.gain.value = 0;
   }
 
   resumeMusic() {
-    if (this.muted || !this.unlocked || !this.music) return;
-    if (this.music.paused) void this.music.play().catch(() => {});
+    this.prime();
+    if (this.musicEl?.paused && this.wantMusic) void this.musicEl.play().catch(() => {});
+    else if (this.musicGain) this.musicGain.gain.value = 0.35;
+    else if (this.wantMusic) this.startMusic();
   }
 
   destroy() {
     this.stopMusic();
-    this.music = null;
-    this.sfxPools = {};
-    this.poolIndex = {};
-    this.unlocked = false;
+    void this.ctx?.close();
+    this.ctx = null;
+    this.master = null;
+    this.buffers.clear();
+    this.pending.clear();
+    if (this.musicEl) {
+      this.musicEl.src = '';
+      this.musicEl = null;
+    }
+    this.htmlSfx = {};
+    this.fetched = false;
+    this.decoded = false;
+    this.primed = false;
+    this.wantMusic = false;
+    this.decodePromise = null;
   }
 }
 
@@ -1299,7 +1456,7 @@ class GameEngine {
 
     if (down && (code === 'Enter' || code === 'NumpadEnter')) {
       if (this.state === 'splash' || this.state === 'gameover') {
-        this.sound.unlock();
+        this.sound.prime();
         this.handleTap();
       }
       return;
@@ -1308,7 +1465,7 @@ class GameEngine {
     if (code === 'Space') {
       if (down) {
         if (this.state === 'playing') {
-          this.sound.unlock();
+          this.sound.prime();
           if (p.grounded && !p.ducking) {
             p.vy = JUMP_FORCE;
             p.grounded = false;
@@ -1338,10 +1495,10 @@ class GameEngine {
 
   /** Tap / click anywhere — start from splash or restart after game over. */
   handleTap() {
-    this.sound.unlock();
-    this.sound.click();
+    this.sound.prime();
     if (this.state === 'splash') this.start();
     else if (this.state === 'gameover') this.restart();
+    this.sound.click();
   }
 
   /** Pointer down — menu taps, or jump while playing (touch + mouse). */
@@ -1351,7 +1508,7 @@ class GameEngine {
       return;
     }
     if (this.state !== 'playing') return;
-    this.sound.unlock();
+    this.sound.prime();
     const p = this.player;
     if (p.grounded && !p.ducking) {
       p.vy = JUMP_FORCE;
@@ -1446,6 +1603,10 @@ export default function HackathonRush({ windowId: _windowId, onClose: _onClose }
   const touchStartY = useRef(0);
 
   useEffect(() => {
+    void prefetchSoundFiles();
+  }, []);
+
+  useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
     window.addEventListener('resize', check);
@@ -1497,13 +1658,14 @@ export default function HackathonRush({ windowId: _windowId, onClose: _onClose }
       <div className="relative w-full h-full bg-black overflow-hidden select-none">
         <canvas
           ref={canvasRef}
+          data-tour-id="hackathon-canvas"
           className="w-full h-full"
           style={{ imageRendering: 'pixelated', display: 'block', transform: 'translateZ(0)', willChange: 'transform', touchAction: 'none', cursor: 'pointer' }}
           onPointerDown={(e) => {
+            engineRef.current?.handlePointerDown();
             e.preventDefault();
             setShowTouchHint(false);
             touchStartY.current = e.clientY;
-            engineRef.current?.handlePointerDown();
           }}
           onPointerMove={(e) => {
             if (e.buttons === 0) return;

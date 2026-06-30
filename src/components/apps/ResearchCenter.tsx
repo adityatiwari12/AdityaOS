@@ -6,7 +6,7 @@ export default function ResearchCenter() {
       <h1 className="text-2xl font-bold mb-2">Research Center</h1>
       <p className="text-gray-400 text-sm mb-8">Peer-reviewed publications & research awards</p>
 
-      <div className="space-y-6">
+      <div data-tour-id="rc-publications" className="space-y-6">
         {userConfig.publications.map((pub, i) => (
           <article key={i} className="p-5 rounded-xl bg-white/5 border border-white/10">
             <h2 className="font-semibold text-lg">{pub.title}</h2>
@@ -29,7 +29,7 @@ export default function ResearchCenter() {
         ))}
       </div>
 
-      <section className="mt-10">
+      <section data-tour-id="rc-certifications" className="mt-10">
         <h2 className="text-lg font-semibold mb-4">Certifications</h2>
         <div className="grid md:grid-cols-2 gap-3">
           {userConfig.certifications.slice(0, 8).map((c, i) => (

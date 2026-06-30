@@ -77,6 +77,7 @@ export default function Dock2() {
                   whileTap={{ scale: 0.9 }}
                   className="relative group"
                   aria-label={app.title}
+                  data-tour-id={`dock-${app.id}`}
                 >
                   <div className={`w-16 h-16 bg-gradient-to-t ${app.color} rounded-2xl flex items-center justify-center shadow-lg`}>
                     <Icon size={36} className="text-white" />

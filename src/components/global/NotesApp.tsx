@@ -402,7 +402,7 @@ const NotesApp = ({ isOpen, onClose, section }: NotesAppProps) => {
                 {competitions.map((item, index) => {
                     const itemId = `competitions-${index}`;
                     return (
-                        <div key={itemId} className="bg-gray-800/50 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                        <div key={itemId} data-tour-id={index === 0 ? 'notes-competitions-card' : undefined} className="bg-gray-800/50 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
                             <h3 className="text-xl font-semibold text-gray-200 mb-2">{item.title}</h3>
                             <div className="text-gray-300 mb-2">{item.description}</div>
                             <div className="text-gray-400 mb-3">Achievement: {item.achievement} ({item.year})</div>
