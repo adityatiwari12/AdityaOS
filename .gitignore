@@ -48,5 +48,6 @@ public/resume.pdf
 public/images/gallery/
 public/images/profile/
 aditya-removebg-preview.png
-# Sound effects (local only)
+# Sound effects — game serves from public/sounds/ (root copies stay local)
 *.mp3
+!public/sounds/**
