@@ -73,8 +73,13 @@ export default function Camera() {
   useEffect(() => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.src = 'https://github.com/adityatiwari12.png';
     img.onload = () => { logoRef.current = img; };
+    img.onerror = () => {
+      const fallback = new Image();
+      fallback.onload = () => { logoRef.current = fallback; };
+      fallback.src = '/appicon.png';
+    };
+    img.src = 'https://github.com/adityatiwari12.png';
   }, []);
 
   const stopStream = useCallback(() => {
@@ -129,11 +134,13 @@ export default function Camera() {
     canvas.height = sh;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    ctx.save();
     if (facing === 'user') {
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
     }
     ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+    ctx.restore();
     drawWatermark(ctx, canvas.width, canvas.height, logoRef.current);
     setPhoto(canvas.toDataURL('image/png'));
     setFlash(true);
