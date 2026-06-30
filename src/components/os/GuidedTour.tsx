@@ -69,23 +69,51 @@ function FinalCTAOverlay() {
   );
 }
 
-function pickMaleVoice(): SpeechSynthesisVoice | null {
+let currentAudio: HTMLAudioElement | null = null;
+
+function stopAudio() {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  if (typeof window !== 'undefined' && window.speechSynthesis) window.speechSynthesis.cancel();
+}
+
+function browserTTSFallback(text: string) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
   const voices = window.speechSynthesis.getVoices();
-  const preferred = [
-    'Google UK English Male',
-    'Microsoft David - English (United States)',
-    'Microsoft David Desktop',
-    'en-GB-Standard-B',
-    'Daniel',
-    'Google US English',
-  ];
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.92; utter.pitch = 0.9; utter.volume = 1;
+  const preferred = ['Google UK English Male', 'Microsoft David', 'Daniel', 'Google US English'];
   for (const name of preferred) {
     const v = voices.find((v) => v.name.includes(name));
-    if (v) return v;
+    if (v) { utter.voice = v; break; }
   }
-  return voices.find((v) => /en/i.test(v.lang) && /male|david|daniel|google uk/i.test(v.name))
-    ?? voices.find((v) => /en/i.test(v.lang))
-    ?? null;
+  window.speechSynthesis.speak(utter);
+}
+
+async function speakWithSarvam(text: string): Promise<void> {
+  try {
+    const res = await fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+    if (!res.ok) throw new Error('sarvam-error');
+    const { audio } = await res.json() as { audio?: string };
+    if (!audio) throw new Error('no-audio');
+    // Decode base64 WAV → blob → Audio element
+    const binary = atob(audio);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const blob = new Blob([bytes], { type: 'audio/wav' });
+    const url = URL.createObjectURL(blob);
+    stopAudio();
+    const el = new Audio(url);
+    el.onended = () => URL.revokeObjectURL(url);
+    currentAudio = el;
+    await el.play();
+  } catch {
+    browserTTSFallback(text);
+  }
 }
 
 export default function GuidedTour() {
@@ -102,27 +130,12 @@ export default function GuidedTour() {
   const cursorRef = useRef<CursorHandle | null>(null);
   const cancelRef = useRef({ cancelled: false });
 
-  // TTS — speak each caption when it changes, respect mute
+  // TTS — speak each caption via Sarvam (server proxy), fall back to browser TTS
   useEffect(() => {
-    if (!running || muted || !captionTitle || typeof window === 'undefined' || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const text = captionTitle + '. ' + captionBody;
-    const speak = () => {
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.rate = 0.92;
-      utter.pitch = 0.95;
-      utter.volume = 1;
-      const voice = pickMaleVoice();
-      if (voice) utter.voice = voice;
-      window.speechSynthesis.speak(utter);
-    };
-    // voices may not be loaded yet on first call
-    if (window.speechSynthesis.getVoices().length > 0) {
-      speak();
-    } else {
-      window.speechSynthesis.addEventListener('voiceschanged', speak, { once: true });
-    }
-    return () => { window.speechSynthesis.cancel(); };
+    if (!running || muted || !captionBody) return;
+    const text = captionTitle ? captionTitle + '. ' + captionBody : captionBody;
+    speakWithSarvam(text);
+    return () => { stopAudio(); };
   }, [captionTitle, captionBody, muted, running]);
 
   // Stop TTS when tour ends or user skips
