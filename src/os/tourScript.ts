@@ -102,49 +102,42 @@ export async function runTourScript(ctx: TourContext) {
   try {
     // ── Step 0: Welcome ──────────────────────────────────────────────────────
     await narrate(0,
-      "Hey there — welcome.",
-      "I'm Aditya's personal guide here. Over the next couple of minutes, I'll show you his work, the startup he's building, his research, and some wins that are honestly pretty hard to believe for someone his age. You don't need to click anything — just sit back.",
-      ctx, 7000
+      "Quick walkthrough of Aditya's work.",
+      "Startup, projects, research, competitions. About 60 seconds.",
+      ctx, 3000
     );
-    await idleDrift(ctx, 1000);
+    await idleDrift(ctx, 500);
 
     // ── Step 1: Founder HQ ───────────────────────────────────────────────────
     await narrate(1,
-      "Okay, let's start with the startup.",
-      "Aditya isn't just an engineer who codes for fun. He's also building something. Let me show you.",
-      ctx, 3500
+      "He co-founded Tokenistt.",
+      "LLM observability and governance platform for engineering teams. Applied to Y Combinator S26.",
+      ctx, 2500
     );
     await clickDockIcon('founder-hq', ctx);
 
-    await hoverTourTarget('fhq-tokenistt', ctx, 600);
+    await hoverTourTarget('fhq-tokenistt', ctx, 400);
     await narrate(1,
-      "This is Tokenistt.",
-      "Here's the problem: companies are shipping AI to production, but they have zero visibility into what it's actually doing. Costs spiral, models hallucinate, and no one knows why. Tokenistt is the control room. Token analytics, model routing, governance — the stuff enterprises desperately need but nobody's built properly yet.",
-      ctx, 3500
+      "What it does.",
+      "Companies shipping AI to production have no visibility into costs, failures, or model behaviour. Tokenistt adds token analytics, model routing, and governance controls.",
+      ctx, 2500
     );
 
-    await hoverTourTarget('fhq-roadmap', ctx, 600);
+    await hoverTourTarget('fhq-roadmap', ctx, 400);
     await narrate(1,
-      "And they're moving fast.",
-      "MVP shipped. Enterprise governance controls are mid-build right now. They've applied to Y Combinator Summer 2026 — so if you're reading this post-acceptance, hi from the past.",
-      ctx, 3500
+      "Current status.",
+      "MVP shipped. Enterprise controls in progress. YC S26 application submitted.",
+      ctx, 2000
     );
 
-    await hoverTourTarget('fhq-metrics', ctx, 600);
-    await narrate(1,
-      "The numbers are early, but they're real.",
-      "No vanity metrics here. Real users, real feedback. The kind of traction you get when you actually talk to customers before you build.",
-      ctx, 3000
-    );
-
-    await hoverTourTarget('fhq-traction', ctx, 600);
+    await hoverTourTarget('fhq-traction', ctx, 400);
     await closeTopWindow(ctx);
 
     // ── Step 2: Projects ─────────────────────────────────────────────────────
     await narrate(2,
-      "Now — the projects.",
-      "Fair warning: these aren't todo apps or CRUD starters. Every single one of these was built to solve a real problem.",
-      ctx, 3000
+      "Projects.",
+      "Production-grade software, not side projects.",
+      ctx, 1500
     );
     await openApp('github', 'Projects', ctx);
     const cx = window.innerWidth / 2;
@@ -152,55 +145,48 @@ export async function runTourScript(ctx: TourContext) {
 
     await ctx.cursor.current?.moveTo(cx - 250, cy - 120, 650);
     await narrate(2,
-      "TalkWithDB — and yes, it actually works.",
-      "You type a question in plain English. It generates the SQL, runs it against your database, and shows you live results. RAG, LLMs, FastAPI backend. Real users use this to query real production databases.",
-      ctx, 2300
+      "TalkWithDB.",
+      "Natural language to SQL. Type a question, get live query results. Built with RAG and LLMs on a FastAPI backend.",
+      ctx, 2000
     );
 
     await ctx.cursor.current?.moveTo(cx + 250, cy + 80, 650);
     await narrate(2,
-      "Sanjivani — AI for healthcare.",
-      "An AI diagnostic assistant that reads medical records using OCR, Named Entity Recognition, and deep learning. He built this for a national hackathon and then pitched it to actual hospitals. Not as a demo — as something they could actually deploy.",
-      ctx, 2300
-    );
-
-    await ctx.cursor.current?.moveTo(cx - 80, cy + 200, 530);
-    await narrate(2,
-      "There's a pattern here.",
-      "Every project has a real user, a real problem, and real code behind it. Not just GitHub repos that compile once. These are things people actually use.",
-      ctx, 3000
+      "Sanjivani.",
+      "AI diagnostic assistant. Reads medical records using OCR and NER. Built for a national hackathon and pitched to hospitals.",
+      ctx, 2000
     );
     await closeTopWindow(ctx);
 
     // ── Step 3: Research ─────────────────────────────────────────────────────
     await narrate(3,
-      "Alright — research.",
-      "Some engineers ship products. Some write papers. Aditya does both, which is rarer than it sounds.",
-      ctx, 3000
+      "Research.",
+      "Published peer-reviewed papers in applied machine learning.",
+      ctx, 1800
     );
     await openApp('research-center', 'Research Center', ctx);
 
-    await hoverTourTarget('rc-publications', ctx, 600);
+    await hoverTourTarget('rc-publications', ctx, 400);
     await narrate(3,
-      "Peer-reviewed. And award-winning.",
-      "His research paper didn't just get published — it won Best Poster Award at a national conference. That's academics saying: this is the best work in the room. Not engineers. Academics.",
-      ctx, 3500
+      "Best Poster Award.",
+      "Won at a national research conference for applied ML work.",
+      ctx, 1800
     );
 
     await scrollToTarget('[data-tour-id="rc-certifications"]', ctx);
-    await hoverTourTarget('rc-certifications', ctx, 600);
+    await hoverTourTarget('rc-certifications', ctx, 400);
     await narrate(3,
-      "And then there are the certifications.",
-      "AWS, Google Cloud, machine learning, deep learning, cybersecurity. This isn't someone who learned one thing deeply and stopped. He's built the kind of breadth that means he can jump into any stack and actually contribute from day one.",
-      ctx, 3500
+      "Certifications.",
+      "AWS, Google Cloud, machine learning, deep learning, cybersecurity.",
+      ctx, 1800
     );
     await closeTopWindow(ctx);
 
     // ── Step 4: Gallery ──────────────────────────────────────────────────────
     await narrate(4,
-      "Okay — this is my favourite part.",
-      "The gallery. These are real photos from real events. I'll walk you through them.",
-      ctx, 3000
+      "Competition photos.",
+      "Real events, real wins.",
+      ctx, 1500
     );
     await openApp('photos', 'Photos', ctx, { photoIndex: 1 });
     await delay(650, ctx.cancel);
@@ -219,44 +205,44 @@ export async function runTourScript(ctx: TourContext) {
       }
       photoIdx = targetIndex;
       await delay(200, ctx.cancel);
-      await narrate(4, title, body, ctx, 3000);
+      await narrate(4, title, body, ctx, 2000);
     }
 
-    // Photo index 1 — thinktank-win (lightbox already open at this photo)
+    // Photo index 1 — thinktank-win
     await narrate(4,
-      "IEEE Think Tank 2026. Aditya's team won.",
-      "This was a national-level competition run by IEEE. Hundreds of teams. Aditya's team came first. Look at that trophy — it's real. So is that smile.",
-      ctx, 5000
+      "IEEE Think Tank 2026.",
+      "National-level IEEE competition. First place.",
+      ctx, 2000
     );
 
-    // Photo index 4 — ministry-hackathon-win (3 Next clicks)
+    // Photo index 4 — ministry-hackathon-win
     await showPhoto(4,
-      "Ministry of Tribal Affairs — and they won this one too.",
-      "This wasn't a college hackathon. This was organised by the Government of India. Aditya's team took first place — and what came with that win was something most developers never see."
+      "Ministry of Tribal Affairs hackathon.",
+      "Government of India organised. First place."
     );
 
-    // Photo index 6 — ministry-cheque (2 Next clicks)
+    // Photo index 6 — ministry-cheque
     await showPhoto(6,
-      "Yeah. An actual cheque from the Ministry.",
-      "Real money. From the Government of India. Handed to Aditya at an official ceremony. He was twenty years old when this happened."
+      "Government grant.",
+      "Official cheque from the Ministry of Tribal Affairs."
     );
 
-    // Photo index 10 — ai-fusion-win (4 Next clicks)
+    // Photo index 10 — ai-fusion-win
     await showPhoto(10,
-      "AI Fusion 2026 — first place again.",
-      "One of the most competitive AI hackathons in India. Teams from IITs. Teams from NITs. Aditya's team looked at the competition, and still came first."
+      "AI Fusion 2026.",
+      "National AI hackathon. First place against IIT and NIT teams."
     );
 
-    // Photo index 15 — best-research-paper-award (5 Next clicks)
+    // Photo index 15 — best-research-paper-award
     await showPhoto(15,
-      "Best Research Paper Award. This one's different.",
-      "This isn't a hackathon trophy. This is academic recognition — a room full of researchers, professors, and domain experts, and his paper was selected as the best. That's a different kind of validation."
+      "Best Research Paper Award.",
+      "Selected at a national academic conference."
     );
 
-    // Photo index 18 — pitching-education-minister (3 Next clicks)
+    // Photo index 18 — pitching-education-minister
     await showPhoto(18,
-      "And this... this is something else.",
-      "That's Aditya pitching to India's Minister of Education. Live demo. No safety net. This is the kind of room most people don't get into at any age — and he was in it at twenty."
+      "Pitched to India's Education Minister.",
+      "Live product demo at a government event."
     );
 
     // Close lightbox first, then the window
@@ -275,37 +261,26 @@ export async function runTourScript(ctx: TourContext) {
 
     // ── Step 5: Achievements ─────────────────────────────────────────────────
     await narrate(5,
-      "Let me put that all in one place.",
-      "Six national hackathon wins. Let's actually look at them.",
-      ctx, 2500
+      "Competition record.",
+      "Six national wins total.",
+      ctx, 1500
     );
     await openApp('notes', 'Notes', ctx, { section: 'competitions' });
     await delay(400, ctx.cancel);
 
-    await hoverTourTarget('notes-competitions-card', ctx, 600);
+    await hoverTourTarget('notes-competitions-card', ctx, 400);
     await narrate(5,
-      "IEEE Think Tank. Ministry of Tribal Affairs. Smart India Hackathon finalist.",
-      "AWS AI for Bharat — international top-five. CanHacks international. These aren't participation certificates. These have real judges, real stakes, and real competition. And he keeps adding to this list.",
-      ctx, 3500
+      "IEEE Think Tank, Ministry of Tribal Affairs, Smart India Hackathon finalist.",
+      "AWS AI for Bharat international top-five. CanHacks international finalist.",
+      ctx, 2500
     );
-
-    const notesEl = document.querySelector('[data-tour-id="notes-competitions-card"]');
-    if (notesEl) {
-      const r = notesEl.getBoundingClientRect();
-      await ctx.cursor.current?.moveTo(r.left + r.width / 2, r.bottom + 120, 600);
-      await narrate(5,
-        "It's not luck. It's a pattern.",
-        "Every few months, there's a new one. He walks into rooms with the hardest problems, and he figures out a way to solve them faster and better than everyone else. That doesn't happen by accident.",
-        ctx, 2300
-      );
-    }
     await closeTopWindow(ctx);
 
     // ── Step 6: Game ─────────────────────────────────────────────────────────
     await narrate(6,
-      "Okay — one more thing, and I promise this one's fun.",
-      "He built a game. An actual game. Between competitions.",
-      ctx, 1700
+      "He also built a game.",
+      "Hackathon Rush — pixel-art endless runner.",
+      ctx, 1500
     );
     await openApp('hackathon-rush', 'Jumping Game', ctx);
     await delay(650, ctx.cancel);
@@ -316,11 +291,11 @@ export async function runTourScript(ctx: TourContext) {
       await ctx.cursor.current?.moveTo(cr.left + cr.width / 2, cr.top + cr.height / 2, 530);
     }
     await narrate(6,
-      "Hackathon Rush. Built entirely from scratch.",
-      "Canvas rendering, custom physics engine, sprite animation, collision detection — all in TypeScript. No game engine. No library. Just code. He built this for fun, in the gaps between everything else you just saw.",
-      ctx, 2300
+      "Built from scratch in TypeScript.",
+      "Custom physics engine, canvas rendering, sprite animation. No game engine used.",
+      ctx, 2000
     );
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 6; i++) {
       window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space', key: ' ', bubbles: true }));
       await delay(80, ctx.cancel);
       window.dispatchEvent(new KeyboardEvent('keyup', { code: 'Space', key: ' ', bubbles: true }));
@@ -330,19 +305,19 @@ export async function runTourScript(ctx: TourContext) {
 
     // ── Step 7: Resume ───────────────────────────────────────────────────────
     await narrate(7,
-      "And if you want everything on one page —",
-      "Here's the resume. Every role, every project, every publication. If you want to download it, there's a button waiting for you on the next screen.",
-      ctx, 2300
+      "Full resume.",
+      "Every role, project, and publication on one page. Download available on the next screen.",
+      ctx, 2000
     );
     await openApp('resume', 'Resume', ctx);
-    await delay(2300, ctx.cancel);
+    await delay(1800, ctx.cancel);
     await closeTopWindow(ctx);
 
     // ── Step 8: Final ────────────────────────────────────────────────────────
     await narrate(8,
-      "That's the tour. And honestly — I'm proud of this one.",
-      "A startup, original research, government grants, national wins, international finals, and a game built for fun. Aditya's looking for the next big challenge. If you're building something that deserves that — reach out.",
-      ctx, 2700
+      "That's the overview.",
+      "Startup, research, government wins, international competitions. If you'd like to work together, reach out.",
+      ctx, 2500
     );
     const store = useOSStore.getState();
     store.windows.forEach((w) => store.closeWindow(w.id));
