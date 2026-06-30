@@ -69,6 +69,25 @@ function FinalCTAOverlay() {
   );
 }
 
+function pickMaleVoice(): SpeechSynthesisVoice | null {
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = [
+    'Google UK English Male',
+    'Microsoft David - English (United States)',
+    'Microsoft David Desktop',
+    'en-GB-Standard-B',
+    'Daniel',
+    'Google US English',
+  ];
+  for (const name of preferred) {
+    const v = voices.find((v) => v.name.includes(name));
+    if (v) return v;
+  }
+  return voices.find((v) => /en/i.test(v.lang) && /male|david|daniel|google uk/i.test(v.name))
+    ?? voices.find((v) => /en/i.test(v.lang))
+    ?? null;
+}
+
 export default function GuidedTour() {
   const running = useTourStore((s) => s.running);
   const step = useTourStore((s) => s.step);
@@ -82,6 +101,36 @@ export default function GuidedTour() {
 
   const cursorRef = useRef<CursorHandle | null>(null);
   const cancelRef = useRef({ cancelled: false });
+
+  // TTS — speak each caption when it changes, respect mute
+  useEffect(() => {
+    if (!running || muted || !captionTitle || typeof window === 'undefined' || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const text = captionTitle + '. ' + captionBody;
+    const speak = () => {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 0.92;
+      utter.pitch = 0.95;
+      utter.volume = 1;
+      const voice = pickMaleVoice();
+      if (voice) utter.voice = voice;
+      window.speechSynthesis.speak(utter);
+    };
+    // voices may not be loaded yet on first call
+    if (window.speechSynthesis.getVoices().length > 0) {
+      speak();
+    } else {
+      window.speechSynthesis.addEventListener('voiceschanged', speak, { once: true });
+    }
+    return () => { window.speechSynthesis.cancel(); };
+  }, [captionTitle, captionBody, muted, running]);
+
+  // Stop TTS when tour ends or user skips
+  useEffect(() => {
+    if (!running && typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+  }, [running]);
 
   useEffect(() => {
     if (!running) return;

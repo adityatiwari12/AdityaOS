@@ -116,7 +116,6 @@ export default function Desktop({ initialBg, backgroundMap }: AppLayoutProps) {
       return;
     }
     openWindow('terminal', 'AI Copilot');
-    openWindow('intro', 'Intro');
   }, [booted, openWindow]);
 
   useEffect(() => {
