@@ -369,14 +369,26 @@ function TreeItem({ node, depth = 0 }: { node: TreeNode; depth?: number }) {
   const hasChildren = !!(node.children?.length);
   return (
     <div>
-      <div className="flex items-start gap-1.5 hover:bg-white/[0.04] rounded-lg transition-colors cursor-pointer py-0.5 px-1"
+      <div
+        className="group rounded-md hover:bg-white/[0.04] transition-colors cursor-pointer"
         style={{ paddingLeft: `${depth * 16 + 4}px` }}
-        onClick={() => hasChildren && setOpen(!open)}>
-        <span className="mt-[3px] w-3 shrink-0">
-          {hasChildren ? (open ? <BsChevronDown size={8} className="text-white/30" /> : <BsChevronRight size={8} className="text-white/30" />) : null}
-        </span>
-        <span className={`text-[12px] font-mono leading-snug ${node.color ?? 'text-[rgba(235,235,245,0.6)]'}`}>{node.name}</span>
-        {node.desc && !hasChildren && <span className="text-[10px] text-[rgba(235,235,245,0.22)] mt-[3px] ml-2 leading-snug">{node.desc}</span>}
+        onClick={() => hasChildren && setOpen(!open)}
+      >
+        <div className="flex items-center gap-1.5 py-[3px] pr-1">
+          <span className="w-3 shrink-0 flex items-center justify-center">
+            {hasChildren
+              ? (open ? <BsChevronDown size={8} className="text-white/30" /> : <BsChevronRight size={8} className="text-white/30" />)
+              : <span className="w-1 h-1 rounded-full bg-white/15 inline-block" />
+            }
+          </span>
+          <span className={`text-[11.5px] font-mono leading-snug ${node.color ?? 'text-[rgba(235,235,245,0.6)]'}`}>{node.name}</span>
+        </div>
+        {node.desc && (
+          <p className="text-[9.5px] text-[rgba(235,235,245,0.28)] leading-tight pb-1 hidden group-hover:block"
+            style={{ paddingLeft: '18px' }}>
+            {node.desc}
+          </p>
+        )}
       </div>
       {hasChildren && open && node.children!.map((c, i) => <TreeItem key={i} node={c} depth={depth + 1} />)}
     </div>
@@ -384,51 +396,233 @@ function TreeItem({ node, depth = 0 }: { node: TreeNode; depth?: number }) {
 }
 
 const TREE: TreeNode = {
-  name: 'src/', color: 'text-white/85',
+  name: 'src/', color: 'text-white/90', desc: 'All application source code — TypeScript, TSX, Astro components',
   children: [
-    { name: 'components/', children: [
-      { name: 'apps/',    color: 'text-[#4FC3F7]', desc: '16 app components' },
-      { name: 'global/',  color: 'text-[#34C759]', desc: 'MacToolbar, Spotlight, Dock, Notifications' },
-      { name: 'os/',      color: 'text-[#BF5AF2]', desc: 'WindowManager, VirtualCursor, GuidedTour, Boot' },
-    ]},
-    { name: 'config/', color: 'text-[#FF9F0A]', desc: 'Content data, userConfig, app config' },
-    { name: 'layouts/', desc: 'AppLayout.tsx — desktop orchestrator + boot' },
-    { name: 'lib/', desc: 'analytics.ts · easterEggs.ts · zIndex.ts' },
-    { name: 'os/', children: [
-      { name: 'types.ts',          color: 'text-[#FF9F0A]', desc: 'AppId, WindowState, WindowPayload' },
-      { name: 'appRegistry.tsx',   color: 'text-[#FF9F0A]', desc: '20+ app definitions' },
-      { name: 'tourScript.ts',     color: 'text-[#FF9F0A]', desc: '9-step automated recruiter tour' },
-      { name: 'WindowManager.tsx', color: 'text-[#FF9F0A]', desc: 'Renders all open windows' },
-    ]},
-    { name: 'pages/', children: [
-      { name: 'api/', color: 'text-[#FF453A]', children: [
-        { name: 'chat.ts',      color: 'text-[#FF6B60]', desc: 'Groq copilot proxy + auth + rate limit' },
-        { name: 'tts.ts',      color: 'text-[#FF6B60]', desc: 'Sarvam TTS proxy — key server-only' },
-        { name: 'auth.ts',     color: 'text-[#FF6B60]', desc: 'OAuth token exchange' },
-        { name: 'analytics.ts',color: 'text-[#FF6B60]', desc: 'Neon Postgres event logging' },
-      ]},
-      { name: 'index.astro', color: 'text-[#FF9F0A]', desc: 'Entry point — SSR page serving React desktop' },
-    ]},
-    { name: 'stores/', children: [
-      { name: 'osStore.ts',  color: 'text-[#34C759]', desc: 'Windows, booted, weather, wallpaper' },
-      { name: 'tourStore.ts',color: 'text-[#34C759]', desc: 'Tour running/step/muted/captions' },
-    ]},
-    { name: 'styles/', desc: 'Global CSS, Tailwind utilities' },
+    {
+      name: 'components/', desc: 'All UI components grouped by responsibility layer',
+      children: [
+        {
+          name: 'apps/', color: 'text-[#4FC3F7]', desc: 'Full application components — each renders inside an OSWindow',
+          children: [
+            { name: 'AnalyticsDashboard.tsx', color: 'text-[#4FC3F7]', desc: 'Live visitor analytics — page views, app opens, country breakdown. Reads from Neon DB via API.' },
+            { name: 'Camera.tsx',             color: 'text-[#4FC3F7]', desc: 'Webcam app using getUserMedia. Captures photos with baked-in AdityaOS watermark. Front camera un-mirrors.' },
+            { name: 'Collaboration.tsx',      color: 'text-[#4FC3F7]', desc: 'Calendly embed for booking meetings. Wrapped in a clean modal-style container.' },
+            { name: 'DeveloperSettings.tsx',  color: 'text-[#4FC3F7]', desc: 'This file — macOS Settings-style engineering documentation with interactive diagrams.' },
+            { name: 'Finder.tsx',             color: 'text-[#4FC3F7]', desc: 'macOS Finder-style file browser. Shows projects, media, and config files from content config.' },
+            { name: 'FounderHQ.tsx',          color: 'text-[#4FC3F7]', desc: 'Tokenistt startup hub — vision, pitch deck PDF, roadmap timeline, and live metrics.' },
+            { name: 'HackathonRush.tsx',      color: 'text-[#4FC3F7]', desc: 'Pixel-art endless runner game. Canvas rendering, custom physics engine, sprite animation — TypeScript only.' },
+            { name: 'Photos.tsx',             color: 'text-[#4FC3F7]', desc: 'Photo gallery with grid thumbnails and fullscreen lightbox. Supports swipe, keyboard nav, and tour integration.' },
+            { name: 'ResearchCenter.tsx',     color: 'text-[#4FC3F7]', desc: 'Publications, research awards, and certifications. Renders from userConfig with DOI links.' },
+          ],
+        },
+        {
+          name: 'global/', color: 'text-[#34C759]', desc: 'OS-level UI chrome: toolbar, dock, overlays, notifications',
+          children: [
+            { name: 'AdminInbox.tsx',         color: 'text-[#34C759]', desc: 'Password-gated admin panel. Fetches and displays contact form messages from Neon DB.' },
+            { name: 'BaseHead.astro',         color: 'text-[#34C759]', desc: 'HTML <head> with meta tags, Open Graph images, fonts, and PWA manifest link.' },
+            { name: 'CalendlyEmbed.tsx',      color: 'text-[#34C759]', desc: 'Calendly widget embed wrapper with loading state and custom styling.' },
+            { name: 'ContactWidget.tsx',      color: 'text-[#34C759]', desc: 'Slide-in contact form. Submits to /api/contact — saves lead to Neon DB and emails Aditya.' },
+            { name: 'DesktopDock.tsx',        color: 'text-[#34C759]', desc: 'Legacy dock (pre-Dock2). Kept for reference. Dock2 is the current active implementation.' },
+            { name: 'DraggableWindow.tsx',    color: 'text-[#34C759]', desc: 'Legacy draggable window shell used by older apps (terminal, notes, github, resume, videos). Uses react-draggable.' },
+            { name: 'GitHubContributions.tsx',color: 'text-[#34C759]', desc: 'GitHub contribution heatmap — fetches streak data from /api/github-streak and renders SVG grid.' },
+            { name: 'GitHubViewer.tsx',       color: 'text-[#34C759]', desc: 'Project cards grid rendered from projects config. Links to GitHub repos and live demos.' },
+            { name: 'LockScreen.tsx',         color: 'text-[#34C759]', desc: 'macOS-style animated lock screen. Blur + slide unlock. Unlocked state persists in sessionStorage.' },
+            { name: 'MacTerminal.tsx',        color: 'text-[#34C759]', desc: 'Full AI Copilot terminal. Offline NLP → Groq fallback, suggestion chips, message history, auth gate.' },
+            { name: 'MacToolbar.tsx',         color: 'text-[#34C759]', desc: 'Top macOS-style menu bar. Shows app name, File/Edit/View menus, clock, battery, wifi status.' },
+            { name: 'MissionControl.tsx',     color: 'text-[#34C759]', desc: 'App switcher overlay (⌃↑ or F3). Shows all open windows in a grid — click to focus.' },
+            { name: 'MobileDock.tsx',         color: 'text-[#34C759]', desc: 'Bottom navigation dock for mobile devices. Fixed icons for key apps.' },
+            { name: 'MobileHomeScreen.tsx',   color: 'text-[#34C759]', desc: 'iOS-style home screen grid for mobile. Replaces the desktop OS on small viewports.' },
+            { name: 'MobileNotification.tsx', color: 'text-[#34C759]', desc: 'Swipeable notification banners on mobile. Slides from top — auto-dismiss after 4s.' },
+            { name: 'NotesApp.tsx',           color: 'text-[#34C759]', desc: 'Tabbed notes viewer: Skills, Experience, Competitions, Education, Extracurricular sections.' },
+            { name: 'PdfViewer.tsx',          color: 'text-[#34C759]', desc: 'PDF renderer using pdfjs-dist. Used by ResumeViewer and FounderHQ pitch deck. Lazy-loaded.' },
+            { name: 'ProjectVideos.tsx',      color: 'text-[#34C759]', desc: 'Video gallery component. Renders project demo videos from videos config with thumbnails.' },
+            { name: 'ResumeViewer.tsx',       color: 'text-[#34C759]', desc: 'Resume PDF viewer with download button. Wraps PdfViewer with resume-specific controls.' },
+            { name: 'ShortcutsOverlay.tsx',   color: 'text-[#34C759]', desc: 'Keyboard shortcuts reference (⌘? or ⌘H). Full-screen overlay listing all keyboard actions.' },
+            { name: 'SpotifyPlayer.tsx',      color: 'text-[#34C759]', desc: 'Spotify embed with now-playing widget. Shows current track, album art, and playback controls.' },
+            { name: 'Spotlight.tsx',          color: 'text-[#34C759]', desc: 'Cmd+K search overlay. Fuzzy-searches apps, sections, and actions. Executes commands directly.' },
+            { name: 'TourNotification.tsx',   color: 'text-[#34C759]', desc: 'macOS notification popup shown 10s after boot (desktop only). Offers to start the guided tour.' },
+            { name: 'WallpaperContextMenu.tsx',color:'text-[#34C759]', desc: 'Right-click context menu on desktop. Options to shuffle wallpaper or upload a custom image.' },
+          ],
+        },
+        {
+          name: 'os/', color: 'text-[#BF5AF2]', desc: 'OS shell components — window system, boot, cursor, dock',
+          children: [
+            { name: 'AppErrorBoundary.tsx',   color: 'text-[#BF5AF2]', desc: 'React error boundary wrapping each app window. Shows a friendly error card instead of crashing the OS.' },
+            { name: 'ArchitectureViewer.tsx', color: 'text-[#BF5AF2]', desc: 'Interactive 3D-style system architecture diagram. Lazy-loaded — not in initial bundle.' },
+            { name: 'BootSequence.tsx',       color: 'text-[#BF5AF2]', desc: 'macOS-style boot animation on first load. Apple logo → progress bar → desktop fade-in.' },
+            { name: 'CareerControlOverlay.tsx',color:'text-[#BF5AF2]', desc: 'Mission Control-style overlay showing all open app windows in a grid. Activated via keyboard.' },
+            { name: 'DesktopObjects.tsx',     color: 'text-[#BF5AF2]', desc: 'Clickable desktop icons (Research, Trophies, Projects, Blog, Photos). Custom SVG icons with labels.' },
+            { name: 'DesktopProfileWidget.tsx',color:'text-[#BF5AF2]', desc: 'Left-side profile card: avatar, name, roles, hackathon wins count, quick nav links.' },
+            { name: 'DesktopWallpaper.tsx',   color: 'text-[#BF5AF2]', desc: 'Wallpaper renderer. Supports built-in gallery + custom uploaded image. Time-of-day tint overlay.' },
+            { name: 'DesktopWidgets.tsx',     color: 'text-[#BF5AF2]', desc: 'Additional desktop widget containers for supplementary UI elements.' },
+            { name: 'Dock2.tsx',              color: 'text-[#BF5AF2]', desc: 'Main app dock with spring bounce animation, active app indicators, and minimized window badges.' },
+            { name: 'GuidedTour.tsx',         color: 'text-[#BF5AF2]', desc: 'Tour orchestrator: Sarvam TTS + browser TTS fallback, caption box, progress indicator, final CTA.' },
+            { name: 'InstagramEmbed.tsx',     color: 'text-[#BF5AF2]', desc: 'Instagram post embed component using the Instagram oEmbed API.' },
+            { name: 'MediaGallery.tsx',       color: 'text-[#BF5AF2]', desc: 'Photo grid with thumbnail navigation and data-tour-gallery-thumb attributes for tour integration.' },
+            { name: 'MenuBarWidgets.tsx',     color: 'text-[#BF5AF2]', desc: 'Right side of menu bar: live clock, weather condition, notification icons.' },
+            { name: 'OSWindow.tsx',           color: 'text-[#BF5AF2]', desc: 'Window chrome shell: title bar, traffic-light buttons, resize handle, drag-to-move. All new apps use this.' },
+            { name: 'TrafficLights.tsx',      color: 'text-[#BF5AF2]', desc: 'Red/yellow/green window control buttons with hover icons. Close, minimize, maximize actions.' },
+            { name: 'VirtualCursor.tsx',      color: 'text-[#BF5AF2]', desc: 'Animated fake cursor for the guided tour. Spring-physics movement, click ripple, imperative ref API.' },
+            { name: 'WeatherEffects.tsx',     color: 'text-[#BF5AF2]', desc: 'Animated rain or snow canvas overlay based on live weather API data from menu bar widget.' },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'config/', color: 'text-[#FF9F0A]', desc: 'All content data — edit these to update what the portfolio shows',
+      children: [
+        { name: 'apps.ts',           color: 'text-[#FF9F0A]', desc: 'App-specific paths (pitch deck local path, resume PDF path, download filenames).' },
+        { name: 'certifications.ts', color: 'text-[#FF9F0A]', desc: 'AWS, Google Cloud, ML, cybersecurity certifications list shown in Research Center.' },
+        { name: 'competitions.ts',   color: 'text-[#FF9F0A]', desc: 'Hackathon wins and competition records. Renders in Notes app and achievement sections.' },
+        { name: 'contact.ts',        color: 'text-[#FF9F0A]', desc: 'Email address, social profile URLs, and contact form preferences.' },
+        { name: 'content/',          color: 'text-[#FF9F0A]', desc: 'Gallery photos and media content — maps indices to filenames, captions, and categories.',
+          children: [
+            { name: 'index.ts', color: 'text-[#FF9F0A]', desc: 'Photo gallery index — maps each photo index to filename, caption, category (award/event/pitch). Used by Photos app and tour.' },
+          ],
+        },
+        { name: 'education.ts',      color: 'text-[#FF9F0A]', desc: 'Degree, university, GPA, graduation year, and notable courses.' },
+        { name: 'experience.ts',     color: 'text-[#FF9F0A]', desc: 'Work experience entries: Tokenistt (Co-Founder & CPO), Mythos Singapore (SDE), internships.' },
+        { name: 'extracurricular.ts',color: 'text-[#FF9F0A]', desc: 'Clubs, societies, volunteer work, and leadership roles outside academics.' },
+        { name: 'index.ts',          color: 'text-[#FF9F0A]', desc: 'Re-exports all config modules as a unified userConfig object consumed across the app.' },
+        { name: 'personal.ts',       color: 'text-[#FF9F0A]', desc: 'Name, bio, location (Indore, India), taglines, and profile photo paths.' },
+        { name: 'projects.ts',       color: 'text-[#FF9F0A]', desc: 'Portfolio projects with title, description, tech stack, GitHub URL, and demo link.' },
+        { name: 'publications.ts',   color: 'text-[#FF9F0A]', desc: 'Peer-reviewed research papers with venue, year, DOI, and awards (e.g., Best Paper Award).' },
+        { name: 'resumeText.ts',     color: 'text-[#FF9F0A]', desc: 'Plain-text resume content injected into the AI copilot system prompt for contextual answers.' },
+        { name: 'site.ts',           color: 'text-[#FF9F0A]', desc: 'Site URL, name, description, and SEO metadata used in BaseHead.' },
+        { name: 'skills.ts',         color: 'text-[#FF9F0A]', desc: 'Technical skills grouped by category (Languages, Frameworks, AI/ML, Cloud, Tools).' },
+        { name: 'social.ts',         color: 'text-[#FF9F0A]', desc: 'GitHub username, LinkedIn URL, Twitter handle, and other social profile links.' },
+        { name: 'videos.ts',         color: 'text-[#FF9F0A]', desc: 'Project demo video entries with title, URL, thumbnail, and description.' },
+      ],
+    },
+    {
+      name: 'layouts/', desc: 'Astro + React layout wrappers',
+      children: [
+        { name: 'AppLayout.tsx', desc: 'Main desktop orchestrator. Handles boot effect, window opens, keyboard shortcuts, wallpaper tint, Konami code, tour, and all global overlays.' },
+        { name: 'Layout.astro', desc: 'Astro page layout wrapper. Includes BaseHead, body styles, and renders the AppLayout React island.' },
+      ],
+    },
+    {
+      name: 'lib/', desc: 'Utility modules — analytics, AI engine, external integrations',
+      children: [
+        { name: 'analytics.ts',    desc: 'Tracks page views and app-open events by posting to /api/analytics (Neon Postgres).' },
+        {
+          name: 'copilot/', desc: 'Offline NLP engine — handles ~70% of queries without hitting the Groq API',
+          children: [
+            { name: 'engine.ts',       color: 'text-[#4FC3F7]', desc: 'Main dispatch layer. Takes a parsed intent and executes the correct OS action (open window, navigate, answer).' },
+            { name: 'entities.ts',     color: 'text-[#4FC3F7]', desc: 'Named entity extraction — pulls project names, app names, and topics from raw query text.' },
+            { name: 'index.ts',        color: 'text-[#4FC3F7]', desc: 'Copilot entry point. Exports the main handleQuery() function used by MacTerminal.' },
+            { name: 'intents.ts',      color: 'text-[#4FC3F7]', desc: 'Intent definitions: patterns (regex + keywords), confidence weights, and action mappings.' },
+            { name: 'knowledgeBase.ts',color: 'text-[#4FC3F7]', desc: 'Local knowledge base — static answers for common questions about Aditya (bio, skills, startup).' },
+            { name: 'nlp.ts',          color: 'text-[#4FC3F7]', desc: 'Core NLP processor: tokenizes query, scores against intent patterns, returns best match with confidence.' },
+            { name: 'types.ts',        color: 'text-[#4FC3F7]', desc: 'TypeScript types for copilot system: Intent, ParsedQuery, CopilotResponse, ActionType.' },
+          ],
+        },
+        { name: 'copilotGuard.ts', desc: 'Auth and rate limit check before Groq API calls. Reads user hash from cookie, enforces 30 req/day per user + 50 global cap.' },
+        { name: 'db.ts',           desc: 'Neon Postgres serverless client. Exports a sql template-tag for query execution in API routes.' },
+        { name: 'easterEggs.ts',   desc: 'Konami code listener (↑↑↓↓←←→→BA). Triggers kernel panic easter egg + opens Research Center.' },
+        { name: 'githubStreak.ts', desc: 'Fetches GitHub contribution data for the streak widget displayed in GitHubContributions.' },
+        { name: 'groqClient.ts',   desc: 'Groq SDK client configuration. Exports a singleton used by /api/chat to call llama-3.3-70b.' },
+        { name: 'motion.ts',       desc: 'Shared Framer Motion animation variants (fadeIn, slideUp, spring configs) reused across components.' },
+        { name: 'reducedMotion.ts',desc: 'Reads prefers-reduced-motion media query. Returns boolean used to disable animations for accessibility.' },
+        { name: 'weather.ts',      desc: 'Fetches current weather from OpenWeatherMap API. Returns temp, condition, city for the menu bar widget.' },
+        { name: 'windowLayout.ts', desc: 'Utility functions for computing window positions and cascade offsets on screen.' },
+        { name: 'zIndex.ts',       desc: 'Monotonically-incrementing z-index counter. Every new focused window calls nextZIndex() to land on top.' },
+      ],
+    },
+    {
+      name: 'os/', desc: 'Core OS machinery — types, registry, window rendering, tour',
+      children: [
+        { name: 'WindowManager.tsx', color: 'text-[#FF9F0A]', desc: 'Reads windows[] from osStore and renders each as an OSWindow or DraggableWindow (legacy). The source of all visible app windows.' },
+        { name: 'appRegistry.tsx',   color: 'text-[#FF9F0A]', desc: 'Master app registry — 20+ AppDefinition entries with id, title, icon, color, component, dock flag, lazy flag.' },
+        { name: 'tourScript.ts',     color: 'text-[#FF9F0A]', desc: '9-step automated recruiter tour. Opens apps, moves virtual cursor, narrates per-photo captions, ends with CTA.' },
+        { name: 'types.ts',          color: 'text-[#FF9F0A]', desc: 'Core type definitions: AppId (union of all app IDs), WindowState, WindowPayload, AppDefinition, CopilotAction.' },
+        {
+          name: 'wrappers/', color: 'text-[#FF9F0A]', desc: 'Legacy DraggableWindow wrappers — older apps built before the OSWindow system',
+          children: [
+            { name: 'ContributionsApp.tsx', color: 'text-[#FF9F0A]', desc: 'Wraps GitHubContributions in a DraggableWindow shell.' },
+            { name: 'GitHubApp.tsx',        color: 'text-[#FF9F0A]', desc: 'Wraps GitHubViewer (project cards) in a DraggableWindow shell.' },
+            { name: 'IntroApp.tsx',         color: 'text-[#FF9F0A]', desc: 'Wraps the Intro welcome screen in a DraggableWindow shell. Shown on mobile boot.' },
+            { name: 'NotesAppWrapper.tsx',  color: 'text-[#FF9F0A]', desc: 'Wraps NotesApp (skills/experience/competitions) in a DraggableWindow shell with payload routing.' },
+            { name: 'ResumeApp.tsx',        color: 'text-[#FF9F0A]', desc: 'Wraps ResumeViewer PDF viewer in a DraggableWindow shell.' },
+            { name: 'SpotifyApp.tsx',       color: 'text-[#FF9F0A]', desc: 'Wraps SpotifyPlayer in a DraggableWindow shell.' },
+            { name: 'TerminalApp.tsx',      color: 'text-[#FF9F0A]', desc: 'Wraps MacTerminal (AI Copilot) in a DraggableWindow shell.' },
+            { name: 'VideosApp.tsx',        color: 'text-[#FF9F0A]', desc: 'Wraps ProjectVideos in a DraggableWindow shell.' },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'pages/', desc: 'Astro pages and server-side API route handlers',
+      children: [
+        {
+          name: 'api/', color: 'text-[#FF453A]', desc: 'All API routes — run server-side only, never bundled to browser',
+          children: [
+            {
+              name: 'admin/', color: 'text-[#FF6B60]', desc: 'Password-protected admin API endpoints',
+              children: [
+                { name: 'login.ts',    color: 'text-[#FF6B60]', desc: 'Validates admin password against ADMIN_PASS env var. Returns auth token for inbox access.' },
+                { name: 'messages.ts', color: 'text-[#FF6B60]', desc: 'Fetches all contact form submissions from Neon DB. Requires admin auth token.' },
+              ],
+            },
+            {
+              name: 'auth/', color: 'text-[#FF6B60]', desc: 'OAuth flow endpoints for Copilot authentication',
+              children: [
+                { name: 'github/callback.ts', color: 'text-[#FF6B60]', desc: 'GitHub OAuth callback. Exchanges code for access token, creates session hash, sets auth cookie.' },
+                { name: 'google.ts',          color: 'text-[#FF6B60]', desc: 'Google OAuth token validation. Verifies id_token with Google, creates deterministic HMAC session hash.' },
+              ],
+            },
+            { name: 'analytics.ts',  color: 'text-[#FF6B60]', desc: 'Logs analytics events (page_view, app_open) to Neon Postgres analytics_events table.' },
+            { name: 'build-tasks.ts',color: 'text-[#FF6B60]', desc: 'Background build task status polling endpoint for dev tooling.' },
+            { name: 'chat.ts',       color: 'text-[#FF6B60]', desc: 'Main Groq copilot proxy. Validates auth, checks rate limit via copilotGuard, calls llama-3.3-70b, returns response.' },
+            { name: 'contact.ts',    color: 'text-[#FF6B60]', desc: 'Contact form handler. Saves message to DB and triggers email notification to Aditya.' },
+            { name: 'copilot.ts',    color: 'text-[#FF6B60]', desc: 'Alternative copilot endpoint used by some client paths.' },
+            { name: 'lead.ts',       color: 'text-[#FF6B60]', desc: 'Lead capture API. Saves name + email from contact widget to Neon Postgres leads table.' },
+            { name: 'now-status.ts', color: 'text-[#FF6B60]', desc: 'Returns Aditya\'s current availability status (available/busy/traveling) for display in the UI.' },
+            { name: 'tts.ts',        color: 'text-[#FF6B60]', desc: 'Sarvam TTS proxy. Reads SARVAM_API_KEY from env, calls api.sarvam.ai, returns base64 WAV audio.' },
+            { name: 'weather.ts',    color: 'text-[#FF6B60]', desc: 'Weather API proxy. Reads OPENWEATHER_KEY from env, fetches current conditions for Indore, India.' },
+          ],
+        },
+        { name: 'index.astro', color: 'text-[#FF9F0A]', desc: 'Main Astro page — SSR entry point. Fetches wallpaper paths server-side, renders AppLayout React island.' },
+      ],
+    },
+    {
+      name: 'stores/', desc: 'Zustand state stores — global reactive state for the OS',
+      children: [
+        { name: 'osStore.ts',  color: 'text-[#34C759]', desc: 'Global OS state: windows[], booted, kernelPanic, retroMode, weather, customWallpaper, mobileOpenOrigins.' },
+        { name: 'tourStore.ts',color: 'text-[#34C759]', desc: 'Guided tour state: running, step, totalSteps, muted, captionTitle, captionBody, showFinal.' },
+      ],
+    },
+    {
+      name: 'styles/', desc: 'Global stylesheets and design token definitions',
+      children: [
+        { name: 'global.css', desc: 'Base styles, CSS reset, font imports, scrollbar styles, and keyframe animations used throughout.' },
+        { name: 'tokens.css', desc: 'CSS custom properties (design tokens) for colors, spacing, and typography scales.' },
+      ],
+    },
+    {
+      name: 'types/', desc: 'Shared TypeScript type definitions outside component scope',
+      children: [
+        { name: 'content.ts', desc: 'Content model types for config data: Project, Publication, Certification, Competition, Experience.' },
+        { name: 'index.ts',   desc: 'Re-exports all shared types for clean imports across the codebase.' },
+      ],
+    },
   ],
 };
 
 function FolderStructureSection() {
   return (
     <div>
-      <SectionHeader title="Folder Structure" subtitle="Hover files for descriptions — click folders to expand" />
-      <div className="rounded-xl bg-[#2C2C2E] p-4 mb-5">
+      <SectionHeader title="Folder Structure" subtitle="Hover any file or folder for a description" />
+      <div className="rounded-xl bg-[#2C2C2E] p-3 mb-5 max-h-[420px] overflow-y-auto no-scrollbar">
         <TreeItem node={TREE} />
       </div>
       <Group label="Summary">
-        <Row label="App Components"  value="16"      sub="Camera, FounderHQ, Photos, HackathonRush…" />
-        <Row label="API Routes"      value="6"       sub="chat, tts, auth, analytics, leads, cron" />
-        <Row label="Zustand Stores"  value="2"       sub="osStore + tourStore" />
-        <Row label="Total Source"    value="~8,000 lines" sub="TypeScript + TSX" />
+        <Row label="App Components"  value="9"            sub="Camera, FounderHQ, Photos, HackathonRush, DeveloperSettings…" />
+        <Row label="API Routes"      value="13"           sub="chat, tts, auth (x2), analytics, contact, lead, weather…" />
+        <Row label="Zustand Stores"  value="2"            sub="osStore + tourStore" />
+        <Row label="Copilot Modules" value="7"            sub="engine, nlp, intents, entities, knowledgeBase, types, index" />
+        <Row label="Config Modules"  value="16"           sub="personal, projects, skills, experience, publications, videos…" />
+        <Row label="Total Source"    value="~10,000 lines" sub="TypeScript, TSX, Astro" />
       </Group>
     </div>
   );

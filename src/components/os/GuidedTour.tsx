@@ -4,6 +4,7 @@ import { BsVolumeMuteFill, BsVolumeUpFill, BsEnvelopeFill, BsDownload } from 're
 import { useTourStore } from '../../stores/tourStore';
 import VirtualCursor, { type CursorHandle } from './VirtualCursor';
 import { runTourScript } from '../../os/tourScript';
+import { stopAudio } from '../../lib/tts';
 
 function FinalCTAOverlay() {
   const skipTour = useTourStore((s) => s.skipTour);
@@ -69,52 +70,6 @@ function FinalCTAOverlay() {
   );
 }
 
-let currentAudio: HTMLAudioElement | null = null;
-
-function stopAudio() {
-  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-  if (typeof window !== 'undefined' && window.speechSynthesis) window.speechSynthesis.cancel();
-}
-
-function browserTTSFallback(text: string) {
-  if (!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const voices = window.speechSynthesis.getVoices();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.rate = 0.92; utter.pitch = 0.9; utter.volume = 1;
-  const preferred = ['Google UK English Male', 'Microsoft David', 'Daniel', 'Google US English'];
-  for (const name of preferred) {
-    const v = voices.find((v) => v.name.includes(name));
-    if (v) { utter.voice = v; break; }
-  }
-  window.speechSynthesis.speak(utter);
-}
-
-async function speakWithSarvam(text: string): Promise<void> {
-  try {
-    const res = await fetch('/api/tts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
-    });
-    if (!res.ok) throw new Error('sarvam-error');
-    const { audio } = await res.json() as { audio?: string };
-    if (!audio) throw new Error('no-audio');
-    // Decode base64 WAV → blob → Audio element
-    const binary = atob(audio);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    const blob = new Blob([bytes], { type: 'audio/wav' });
-    const url = URL.createObjectURL(blob);
-    stopAudio();
-    const el = new Audio(url);
-    el.onended = () => URL.revokeObjectURL(url);
-    currentAudio = el;
-    await el.play();
-  } catch {
-    browserTTSFallback(text);
-  }
-}
 
 export default function GuidedTour() {
   const running = useTourStore((s) => s.running);
@@ -130,19 +85,9 @@ export default function GuidedTour() {
   const cursorRef = useRef<CursorHandle | null>(null);
   const cancelRef = useRef({ cancelled: false });
 
-  // TTS — speak each caption via Sarvam (server proxy), fall back to browser TTS
-  useEffect(() => {
-    if (!running || muted || !captionBody) return;
-    const text = captionTitle ? captionTitle + '. ' + captionBody : captionBody;
-    speakWithSarvam(text);
-    return () => { stopAudio(); };
-  }, [captionTitle, captionBody, muted, running]);
-
   // Stop TTS when tour ends or user skips
   useEffect(() => {
-    if (!running && typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
+    if (!running) stopAudio();
   }, [running]);
 
   useEffect(() => {
@@ -167,7 +112,7 @@ export default function GuidedTour() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[9980] flex items-center gap-3 px-4 py-3 rounded-2xl bg-black/75 backdrop-blur-xl border border-white/15 shadow-2xl max-w-md w-[calc(100%-2rem)]"
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[9980] flex items-start gap-3 px-4 py-3 rounded-2xl bg-black/75 backdrop-blur-xl border border-white/15 shadow-2xl max-w-xl w-[calc(100%-2rem)]"
           >
             <img
               src="/images/profile/aditya.png"
@@ -176,7 +121,7 @@ export default function GuidedTour() {
             />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-white leading-tight">{captionTitle}</p>
-              <p className="text-xs text-white/60 leading-snug mt-0.5 line-clamp-2">{captionBody}</p>
+              <p className="text-xs text-white/60 leading-snug mt-0.5">{captionBody}</p>
             </div>
             <button
               onClick={toggleMute}

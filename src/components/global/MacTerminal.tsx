@@ -683,10 +683,14 @@ When an action fits, pair it with a short warm confirmation in "message". If a q
     <DraggableWindow
       title="AI Copilot"
       onClose={onClose}
-      initialPosition={introMode ? defaultWindowLayout('intro').position : {
-        x: typeof window !== 'undefined' ? Math.floor(window.innerWidth * 0.1) : 100,
-        y: typeof window !== 'undefined' ? Math.floor(window.innerHeight * 0.1) : 80,
-      }}
+      initialPosition={introMode ? defaultWindowLayout('intro').position : (() => {
+        if (typeof window === 'undefined') return { x: 260, y: 140 };
+        const w = 720, h = 560;
+        return {
+          x: Math.round((window.innerWidth - w) / 2),
+          y: Math.round((window.innerHeight - 40 - 110 - h) / 2) + 40,
+        };
+      })()}
       initialSize={introMode ? defaultWindowLayout('intro').size : { width: 720, height: 560 }}
       className="bg-[#212121]"
     >
