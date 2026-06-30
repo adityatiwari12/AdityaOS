@@ -23,7 +23,8 @@ export type AppId =
   | 'photos'
   | 'architecture-viewer'
   | 'hackathon-rush'
-  | 'camera';
+  | 'camera'
+  | 'dev-settings';
 
 export interface WindowPayload {
   section?: string;

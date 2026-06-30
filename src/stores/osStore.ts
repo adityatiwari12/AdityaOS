@@ -36,6 +36,7 @@ const IDEAL_SIZES: Partial<Record<AppId, { width: number; height: number }>> = {
   photos: { width: 880, height: 600 },
   'architecture-viewer': { width: 900, height: 620 },
   'hackathon-rush': { width: 9999, height: 9999 },
+  'dev-settings': { width: 880, height: 600 },
 };
 
 /** A window size that always fits inside the available work area. */
@@ -76,6 +77,7 @@ function defaultPosition(appId: AppId, index: number) {
     collaboration: { x: w * 0.2, y: 80 },
     photos: { x: w * 0.18, y: 80 },
     'architecture-viewer': { x: w * 0.12, y: 80 },
+    'dev-settings': { x: Math.round((w - size.width) / 2), y: Math.round((h - TOP_INSET - BOTTOM_RESERVE - size.height) / 2) + TOP_INSET },
   };
   const desired = offsets[appId] ?? { x: 80 + index * 24, y: 80 + index * 24 };
 

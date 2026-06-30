@@ -3,6 +3,7 @@ import {
   BsGithub, BsStickyFill, BsFilePdf, BsPlayCircleFill, BsGraphUp,
   BsFolder2, BsRocket, BsJournalRichtext,
   BsBarChart, BsCalendar, BsDiagram3, BsImages, BsCameraFill,
+  BsGearFill,
 } from 'react-icons/bs';
 import { RiTerminalFill, RiTerminalBoxFill } from 'react-icons/ri';
 import type { AppDefinition } from './types';
@@ -27,6 +28,7 @@ import Collaboration from '../components/apps/Collaboration';
 import Photos from '../components/apps/Photos';
 import HackathonRush from '../components/apps/HackathonRush';
 import Camera from '../components/apps/Camera';
+import DeveloperSettings from '../components/apps/DeveloperSettings';
 const AnalyticsDashboard = lazy(() => import('../components/apps/AnalyticsDashboard'));
 const ArchitectureViewer = lazy(() => import('../components/os/ArchitectureViewer'));
 
@@ -37,7 +39,7 @@ export const appRegistry: AppDefinition[] = [
   { id: 'videos', title: 'Project Videos', icon: BsPlayCircleFill, color: 'from-rose-600 to-rose-400', component: VideosApp, singleton: true, dock: true, legacyWindow: true },
   { id: 'contributions', title: 'GitHub Activity', icon: BsGraphUp, color: 'from-cyan-600 to-cyan-400', component: ContributionsApp, singleton: true, dock: false, legacyWindow: true },
   { id: 'notes', title: 'Notes', icon: BsStickyFill, color: 'from-yellow-600 to-yellow-400', component: NotesAppWrapper, singleton: true, dock: true, legacyWindow: true },
-  { id: 'resume', title: 'Resume', icon: BsFilePdf, color: 'from-red-600 to-red-400', component: ResumeApp, singleton: true, dock: true, legacyWindow: true },
+  { id: 'resume', title: 'Resume', icon: BsFilePdf, color: 'from-red-600 to-red-400', component: ResumeApp, singleton: true, dock: false, legacyWindow: true },
   { id: 'spotify', title: 'Spotify', icon: BsPlayCircleFill, color: 'from-green-600 to-green-400', component: SpotifyApp, singleton: true, dock: false, legacyWindow: true },
   { id: 'finder', title: 'Finder', icon: BsFolder2, color: 'from-blue-500 to-blue-300', component: Finder, singleton: true, dock: true, lazy: false },
   { id: 'founder-hq', title: 'Founder HQ', icon: BsRocket, color: 'from-orange-600 to-orange-400', component: FounderHQ, singleton: true, dock: true, lazy: false },
@@ -48,6 +50,7 @@ export const appRegistry: AppDefinition[] = [
   { id: 'architecture-viewer', title: 'Architecture', icon: BsDiagram3, color: 'from-slate-600 to-slate-400', component: ArchitectureViewer, singleton: false, dock: false, lazy: true },
   { id: 'hackathon-rush', title: 'Jumping Game', icon: HackathonRushIcon, color: 'from-violet-600 to-indigo-400', component: HackathonRush, singleton: true, dock: false, lazy: false },
   { id: 'camera', title: 'Camera', icon: BsCameraFill, color: 'from-zinc-700 to-zinc-500', component: Camera, singleton: true, dock: true, lazy: false },
+  { id: 'dev-settings', title: 'Developer Settings', icon: BsGearFill, color: 'from-gray-700 to-gray-500', component: DeveloperSettings, singleton: true, dock: true, lazy: false },
 ];
 
 export function getAppDefinition(appId: string) {
