@@ -197,6 +197,7 @@ export interface SpotifyConfig {
 export interface ResumeConfig {
   url: string;
   localPath: string;
+  downloadName?: string;
 }
 
 export interface SEOConfig {

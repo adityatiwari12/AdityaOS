@@ -1,6 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { userConfig } from '../../config/index';
+import { trackResumeDownload } from '../../lib/analytics';
 import DraggableWindow from './DraggableWindow';
+
+const PdfViewer = lazy(() => import('./PdfViewer'));
 
 interface ResumeViewerProps {
   isOpen: boolean;
@@ -8,8 +11,6 @@ interface ResumeViewerProps {
 }
 
 export default function ResumeViewer({ isOpen, onClose }: ResumeViewerProps) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -23,36 +24,34 @@ export default function ResumeViewer({ isOpen, onClose }: ResumeViewerProps) {
 
   if (!isOpen) return null;
 
+  const { localPath, downloadName } = userConfig.resume;
+
   return (
     <DraggableWindow
       title="Resume.pdf"
       onClose={onClose}
-      initialPosition={{ 
-        x: Math.floor(window.innerWidth * 0.4), 
-        y: Math.floor(window.innerHeight * 0.2) 
+      initialPosition={{
+        x: Math.floor(window.innerWidth * 0.4),
+        y: Math.floor(window.innerHeight * 0.2),
       }}
       className="w-[90%] h-[90%] max-w-5xl"
       initialSize={{ width: 800, height: 600 }}
     >
-      <div className="h-full bg-white">
-        <figure className="h-full">
-          <object 
-            data={userConfig.resume.localPath} 
-            type="application/pdf" 
-            width="100%" 
-            className="h-full"
-            aria-label="Embedded resume PDF"
-            title="Resume PDF"
-          >
-            <p className="p-4 text-sm text-gray-700">
-              Your browser can’t display this PDF. 
-              <a href={userConfig.resume.url} target="_blank" rel="noreferrer noopener" className="text-blue-600 underline">
-                Open the resume in a new tab
-              </a>.
-            </p>
-          </object>
-        </figure>
-      </div>
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center h-full text-sm text-gray-400">
+            Loading viewer…
+          </div>
+        }
+      >
+        <PdfViewer
+          src={localPath}
+          title="Resume"
+          downloadName={downloadName}
+          theme="light"
+          onDownload={trackResumeDownload}
+        />
+      </Suspense>
     </DraggableWindow>
   );
-} 
+}

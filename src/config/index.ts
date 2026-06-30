@@ -32,7 +32,7 @@ import { publications } from './publications';
 import { certifications } from './certifications';
 import { videos } from './videos';
 export { hackathons, knowledgeNotes, founderHQ, careerGoals, nowStatus } from './content/index';
-import { spotify, resume } from './apps';
+import { spotify, resume, pitchDeck } from './apps';
 import { seo, theme } from './site';
 
 /**
@@ -68,4 +68,4 @@ export const userConfig: UserConfig = {
 } as const;
 
 // Export individual modules for granular imports if needed
-export { personal, social, contact, education, courses, experience, skills, extraCurricularRoles, extraCurricularActivities, competitions, projects, publications, certifications, videos, spotify, resume, seo, theme };
+export { personal, social, contact, education, courses, experience, skills, extraCurricularRoles, extraCurricularActivities, competitions, projects, publications, certifications, videos, spotify, resume, pitchDeck, seo, theme };

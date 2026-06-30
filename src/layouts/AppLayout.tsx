@@ -5,7 +5,6 @@ import MacToolbar from '../components/global/MacToolbar';
 import MobileDock from '../components/global/MobileDock';
 import ShortcutsOverlay from '../components/global/ShortcutsOverlay';
 import ContactWidget from '../components/global/ContactWidget';
-import ShortcutHint from '../components/global/ShortcutHint';
 import MobileHomeScreen from '../components/global/MobileHomeScreen';
 import LockScreen from '../components/global/LockScreen';
 import MobileNotification from '../components/global/MobileNotification';
@@ -248,7 +247,6 @@ export default function Desktop({ initialBg, backgroundMap }: AppLayoutProps) {
       />
 
       <ShortcutsOverlay open={showShortcuts} onClose={() => setShowShortcuts(false)} />
-      <ShortcutHint />
       <ContactWidget open={isContactOpen} onClose={() => setIsContactOpen(false)} />
 
       <AnimatePresence>

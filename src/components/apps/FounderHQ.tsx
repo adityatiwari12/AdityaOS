@@ -1,4 +1,8 @@
+import { lazy, Suspense } from 'react';
 import { founderHQ } from '../../config/content/index';
+import { pitchDeck } from '../../config/apps';
+
+const PdfViewer = lazy(() => import('../global/PdfViewer'));
 
 export default function FounderHQ() {
   return (
@@ -29,24 +33,23 @@ export default function FounderHQ() {
       </section>
 
       <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold">Pitch Deck</h2>
-          <a
-            href="/tokenistt-pitch-deck.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs px-3 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white"
+        <h2 className="text-lg font-semibold mb-3">Pitch Deck</h2>
+        <div className="rounded-xl overflow-hidden border border-white/10 h-[50vh] min-h-[320px] md:h-[460px]">
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center h-full text-sm text-gray-500">
+                Loading pitch deck…
+              </div>
+            }
           >
-            Open in new tab ↗
-          </a>
-        </div>
-        <div className="rounded-xl overflow-hidden border border-white/10 bg-black/30">
-          <iframe
-            src="/tokenistt-pitch-deck.pdf#view=FitH"
-            title="Tokenistt Pitch Deck"
-            className="w-full h-[50vh] min-h-[320px] md:h-[460px]"
-            loading="lazy"
-          />
+            <PdfViewer
+              src={pitchDeck.localPath}
+              title="Tokenistt Pitch Deck"
+              downloadName={pitchDeck.downloadName}
+              theme="dark"
+              className="h-full"
+            />
+          </Suspense>
         </div>
       </section>
 

@@ -144,7 +144,7 @@ const GitHubViewer = ({ isOpen, onClose, selectedProjectId }: GitHubViewerProps)
         initialSize={{ width: 800, height: 600 }}
       >
       <div className="flex flex-col flex-grow min-h-0 h-full">
-        <div className="overflow-y-auto flex-grow min-h-0 p-4 md:p-6">
+        <div className="overflow-y-auto no-scrollbar flex-grow min-h-0 p-4 md:p-6">
           {!showStructure ? (
             <>
               <h2 className="text-2xl font-bold mb-4 text-gray-200">My Projects</h2>

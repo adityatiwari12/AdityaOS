@@ -2,7 +2,7 @@ import { userConfig } from '../../config/index';
 
 export default function ResearchCenter() {
   return (
-    <div className="h-full overflow-y-auto text-gray-200 p-6">
+    <div className="h-full overflow-y-auto no-scrollbar text-gray-200 p-6">
       <h1 className="text-2xl font-bold mb-2">Research Center</h1>
       <p className="text-gray-400 text-sm mb-8">Peer-reviewed publications & research awards</p>
 

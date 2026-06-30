@@ -12,4 +12,11 @@ export const spotify: SpotifyConfig = {
 export const resume: ResumeConfig = {
   url: '/resume.pdf',
   localPath: '/resume.pdf',
+  downloadName: 'Aditya_Tiwari_Resume.pdf',
+};
+
+export const pitchDeck: ResumeConfig = {
+  url: '/tokenistt-pitch-deck.pdf',
+  localPath: '/tokenistt-pitch-deck.pdf',
+  downloadName: 'Tokenistt_Pitch_Deck.pdf',
 };

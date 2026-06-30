@@ -7,24 +7,21 @@ interface TrafficLightsProps {
   zoomed?: boolean;
 }
 
-/**
- * Authentic macOS window traffic lights. Glyphs (×, −, zoom arrows) reveal only
- * when hovering the group. Hovering the green button reveals a window menu with
- * Fill Screen / Tile Left / Tile Right, matching modern macOS behavior.
- */
+/** macOS-style traffic lights — ×, −, and zoom glyphs always visible on the dots. */
 export default function TrafficLights({ onClose, onMinimize, onZoom, onTileLeft, onTileRight, zoomed }: TrafficLightsProps) {
-  const glyph = 'pointer-events-none absolute inset-0 m-auto opacity-0 group-hover/tl:opacity-100 transition-opacity';
+  const dot = 'relative w-[18px] h-[18px] rounded-full ring-[0.5px] ring-black/20 active:brightness-90 shrink-0';
+  const glyph = 'pointer-events-none absolute inset-0 m-auto opacity-100';
   const stroke = 'rgba(0,0,0,0.55)';
   const hasTiling = !!(onTileLeft || onTileRight);
 
   return (
-    <div className="group/tl flex items-center gap-[9px]">
+    <div className="flex items-center gap-[10px]">
       <button
         onClick={onClose}
         aria-label="Close"
-        className="relative w-[15px] h-[15px] rounded-full bg-[var(--tl-close)] ring-[0.5px] ring-black/20 active:brightness-90"
+        className={`${dot} bg-[var(--tl-close)]`}
       >
-        <svg viewBox="0 0 12 12" width="15" height="15" className={glyph}>
+        <svg viewBox="0 0 12 12" width="14" height="14" className={glyph}>
           <path d="M3.6 3.6l4.8 4.8M8.4 3.6l-4.8 4.8" stroke={stroke} strokeWidth="1.3" strokeLinecap="round" />
         </svg>
       </button>
@@ -32,9 +29,9 @@ export default function TrafficLights({ onClose, onMinimize, onZoom, onTileLeft,
       <button
         onClick={onMinimize}
         aria-label="Minimize"
-        className="relative w-[15px] h-[15px] rounded-full bg-[var(--tl-min)] ring-[0.5px] ring-black/20 active:brightness-90"
+        className={`${dot} bg-[var(--tl-min)]`}
       >
-        <svg viewBox="0 0 12 12" width="15" height="15" className={glyph}>
+        <svg viewBox="0 0 12 12" width="14" height="14" className={glyph}>
           <path d="M3.2 6h5.6" stroke={stroke} strokeWidth="1.3" strokeLinecap="round" />
         </svg>
       </button>
@@ -43,9 +40,9 @@ export default function TrafficLights({ onClose, onMinimize, onZoom, onTileLeft,
         <button
           onClick={onZoom}
           aria-label={zoomed ? 'Restore' : 'Zoom'}
-          className="relative w-[15px] h-[15px] rounded-full bg-[var(--tl-zoom)] ring-[0.5px] ring-black/20 active:brightness-90 block"
+          className={`${dot} bg-[var(--tl-zoom)] block`}
         >
-          <svg viewBox="0 0 12 12" width="15" height="15" className={glyph}>
+          <svg viewBox="0 0 12 12" width="14" height="14" className={glyph}>
             <path d="M4.2 4.2h3.6v3.6z" fill={stroke} transform="rotate(180 6 6)" />
             <path d="M4.2 4.2h3.6v3.6z" fill={stroke} />
           </svg>
@@ -53,7 +50,7 @@ export default function TrafficLights({ onClose, onMinimize, onZoom, onTileLeft,
 
         {hasTiling && (
           <div
-            className="absolute left-0 top-[15px] pt-2 z-[300] hidden group-hover/zoom:block"
+            className="absolute left-0 top-[18px] pt-2 z-[300] hidden group-hover/zoom:block"
             onPointerDown={(e) => e.stopPropagation()}
           >
             <div className="w-44 rounded-xl glass-strong shadow-window p-1.5 text-[13px] text-white/90">

@@ -37,20 +37,6 @@ const P = {
   groundLine: ['#a07840', '#2d1555', '#0d1526', '#0d2a38', '#a8b0b8'],
 };
 
-// ─── Notification messages ────────────────────────────────────────────────────
-const MILESTONE_NOTIFS = [
-  'Production looks stable.',
-  'Commit streak looking good.',
-  'AI Copilot is impressed.',
-  'Push to main. No conflicts.',
-  'Build passed. All green.',
-  'Zero bugs. For now.',
-  'Linting clean.',
-  'Tests passing.',
-  'Code review approved.',
-  'Deployment pipeline green.',
-];
-
 // ─── Types ───────────────────────────────────────────────────────────────────
 type GameState = 'splash' | 'playing' | 'paused' | 'gameover';
 
@@ -87,74 +73,110 @@ interface Particle {
   type: 'dust' | 'damage' | 'sparkle' | 'exhaust' | 'steam' | 'firefly';
 }
 
-interface NotifItem { id: number; text: string; }
 interface AchievementItem { id: string; title: string; desc: string; }
 
 // ─── Sound Manager ────────────────────────────────────────────────────────────
+const SFX_KEYS = ['jump', 'pickup', 'damage', 'achievement', 'click'] as const;
+type SfxKey = (typeof SFX_KEYS)[number];
+const POOL_SIZE = 4;
+
 class SoundManager {
-  private sounds: Record<string, HTMLAudioElement> = {};
-  private musicReady = false;
+  private music: HTMLAudioElement | null = null;
+  private sfxPools: Partial<Record<SfxKey, HTMLAudioElement[]>> = {};
+  private poolIndex: Partial<Record<SfxKey, number>> = {};
   private muted = false;
+  private unlocked = false;
 
   load() {
-    const files: Record<string, string> = {
-      jump: '/sounds/jump.mp3',
-      pickup: '/sounds/pickup.mp3',
-      damage: '/sounds/damage.mp3',
-      achievement: '/sounds/achievement.mp3',
-      click: '/sounds/click.mp3',
-      music: '/sounds/soundtrack.mp3',
-    };
-    for (const [k, src] of Object.entries(files)) {
-      const a = new Audio(src);
-      a.preload = 'auto';
-      if (k === 'music') { a.loop = true; a.volume = 0.30; }
-      else { a.volume = 0.45; }
-      this.sounds[k] = a;
+    for (const key of SFX_KEYS) {
+      this.sfxPools[key] = Array.from({ length: POOL_SIZE }, () => {
+        const a = new Audio(`/sounds/${key}.mp3`);
+        a.preload = 'auto';
+        a.volume = 0.45;
+        return a;
+      });
+      this.poolIndex[key] = 0;
     }
-    this.musicReady = true;
+
+    this.music = new Audio('/sounds/soundtrack.mp3');
+    this.music.preload = 'auto';
+    this.music.loop = true;
+    this.music.volume = 0.3;
   }
 
-  private play(key: string) {
-    if (this.muted) return;
-    const src = this.sounds[key];
-    if (!src) return;
-    const clone = src.cloneNode() as HTMLAudioElement;
-    clone.volume = src.volume;
-    clone.play().catch(() => {});
+  /** Must run inside a user gesture (tap / key) before audio can play. */
+  unlock() {
+    if (this.unlocked) return;
+    this.unlocked = true;
+
+    const unlockOne = (audio: HTMLAudioElement) => {
+      const vol = audio.volume;
+      audio.volume = 0;
+      const p = audio.play();
+      if (p) {
+        p.then(() => {
+          audio.pause();
+          audio.currentTime = 0;
+          audio.volume = vol;
+        }).catch(() => {
+          audio.volume = vol;
+        });
+      } else {
+        audio.volume = vol;
+      }
+    };
+
+    for (const pool of Object.values(this.sfxPools)) {
+      pool?.forEach(unlockOne);
+    }
+    if (this.music) unlockOne(this.music);
   }
 
-  jump() { this.play('jump'); }
-  pickup() { this.play('pickup'); }
-  damage() { this.play('damage'); }
-  achievement() { this.play('achievement'); }
-  click() { this.play('click'); }
+  private playSfx(key: SfxKey) {
+    if (this.muted || !this.unlocked) return;
+    const pool = this.sfxPools[key];
+    if (!pool?.length) return;
+
+    const idx = this.poolIndex[key] ?? 0;
+    const audio = pool[idx % pool.length];
+    this.poolIndex[key] = (idx + 1) % pool.length;
+
+    audio.currentTime = 0;
+    void audio.play().catch(() => {});
+  }
+
+  jump() { this.playSfx('jump'); }
+  pickup() { this.playSfx('pickup'); }
+  damage() { this.playSfx('damage'); }
+  achievement() { this.playSfx('achievement'); }
+  click() { this.playSfx('click'); }
 
   startMusic() {
-    if (this.muted || !this.musicReady) return;
-    const m = this.sounds['music'];
-    if (m && m.paused) m.play().catch(() => {});
+    if (this.muted || !this.unlocked || !this.music) return;
+    if (this.music.paused) void this.music.play().catch(() => {});
   }
 
   stopMusic() {
-    const m = this.sounds['music'];
-    if (m && !m.paused) { m.pause(); m.currentTime = 0; }
+    if (!this.music) return;
+    this.music.pause();
+    this.music.currentTime = 0;
   }
 
   pauseMusic() {
-    const m = this.sounds['music'];
-    if (m && !m.paused) m.pause();
+    this.music?.pause();
   }
 
   resumeMusic() {
-    if (this.muted) return;
-    const m = this.sounds['music'];
-    if (m && m.paused) m.play().catch(() => {});
+    if (this.muted || !this.unlocked || !this.music) return;
+    if (this.music.paused) void this.music.play().catch(() => {});
   }
 
   destroy() {
     this.stopMusic();
-    for (const a of Object.values(this.sounds)) { a.src = ''; }
+    this.music = null;
+    this.sfxPools = {};
+    this.poolIndex = {};
+    this.unlocked = false;
   }
 }
 
@@ -782,7 +804,6 @@ const ACHIEVEMENTS: Record<string, { title: string; desc: string }> = {
 };
 
 // ─── Game Engine ──────────────────────────────────────────────────────────────
-type NotifCb = (n: NotifItem) => void;
 type AchievCb = (a: AchievementItem) => void;
 
 class GameEngine {
@@ -827,7 +848,6 @@ class GameEngine {
   // Spawn timers
   private obstacleTimer = 0;
   private powerUpTimer = 0;
-  private notifTimer = 0;
   private eid = 0;
 
   // Stats
@@ -847,17 +867,15 @@ class GameEngine {
   sound = new SoundManager();
 
   // Callbacks
-  private notifCb: NotifCb = () => {};
   private achievCb: AchievCb = () => {};
 
-  init(canvas: HTMLCanvasElement, notifCb: NotifCb, achievCb: AchievCb) {
+  init(canvas: HTMLCanvasElement, achievCb: AchievCb) {
     this.canvas = canvas;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     this.ctx = ctx;
     this.ctx.imageSmoothingEnabled = false;
 
-    this.notifCb = notifCb;
     this.achievCb = achievCb;
 
     // Load char image
@@ -1054,16 +1072,6 @@ class GameEngine {
       }
     }
 
-    // Notifications every 200 commits
-    this.notifTimer -= dt;
-    if (this.notifTimer <= 0) {
-      if (this.commits > 0 && this.commits % 200 < 20) {
-        const msg = MILESTONE_NOTIFS[Math.floor(Math.random() * MILESTONE_NOTIFS.length)];
-        this.notifCb({ id: Date.now(), text: msg });
-      }
-      this.notifTimer = 200 + Math.random() * 100;
-    }
-
     // Achievements
     this.damageFreePeriod += dtf;
     this.checkAchievement('zero-downtime', this.damageFreePeriod >= 3000);
@@ -1108,7 +1116,6 @@ class GameEngine {
     spawnParticles(this.particles, PLAYER_X, this.player.y, 'damage', 6);
     if (obs.type === 'bug') this.bugHits++;
     this.checkAchievement('bug-hunter', this.bugHits >= 10);
-    this.notifCb({ id: Date.now(), text: 'Taking damage! Watch out!' });
     if (this.energy <= 0) this.triggerGameOver();
   }
 
@@ -1118,17 +1125,14 @@ class GameEngine {
     if (pu.type === 'coffee') {
       this.energy = Math.min(100, this.energy + 20);
       this.coffees++;
-      this.notifCb({ id: Date.now(), text: 'Coffee levels restored. ☕' });
       this.checkAchievement('caffeine-addict', this.coffees >= 5);
     } else if (pu.type === 'star') {
       this.distance += 500;
       this.stars++;
-      this.notifCb({ id: Date.now(), text: 'GitHub star! +bonus commits ⭐' });
       this.checkAchievement('open-source-hero', this.stars >= 5);
     } else if (pu.type === 'rocket') {
       this.rocketActive = true;
       this.rocketTimer = ROCKET_DURATION_MS;
-      this.notifCb({ id: Date.now(), text: 'Deploy rocket activated! 🚀' });
     }
   }
 
@@ -1295,6 +1299,7 @@ class GameEngine {
 
     if (down && (code === 'Enter' || code === 'NumpadEnter')) {
       if (this.state === 'splash' || this.state === 'gameover') {
+        this.sound.unlock();
         this.handleTap();
       }
       return;
@@ -1303,6 +1308,7 @@ class GameEngine {
     if (code === 'Space') {
       if (down) {
         if (this.state === 'playing') {
+          this.sound.unlock();
           if (p.grounded && !p.ducking) {
             p.vy = JUMP_FORCE;
             p.grounded = false;
@@ -1332,6 +1338,8 @@ class GameEngine {
 
   /** Tap / click anywhere — start from splash or restart after game over. */
   handleTap() {
+    this.sound.unlock();
+    this.sound.click();
     if (this.state === 'splash') this.start();
     else if (this.state === 'gameover') this.restart();
   }
@@ -1343,6 +1351,7 @@ class GameEngine {
       return;
     }
     if (this.state !== 'playing') return;
+    this.sound.unlock();
     const p = this.player;
     if (p.grounded && !p.ducking) {
       p.vy = JUMP_FORCE;
@@ -1378,7 +1387,6 @@ class GameEngine {
     this.bgScrollX = [0, 0, 0, 0];
     this.obstacleTimer = 1200;
     this.powerUpTimer = 4000;
-    this.notifTimer = 2000;
     this.bugHits = 0;
     this.coffees = 0;
     this.stars = 0;
@@ -1401,28 +1409,7 @@ class GameEngine {
   }
 }
 
-// ─── Notification / Achievement overlay components ────────────────────────────
-function NotifBanner({ text, onDone }: { text: string; onDone: () => void }) {
-  useEffect(() => {
-    const t = setTimeout(onDone, 3200);
-    return () => clearTimeout(t);
-  }, [onDone]);
-
-  return (
-    <div
-      className="flex items-center gap-2 px-3 py-2 rounded-xl shadow-xl text-xs text-white backdrop-blur-sm"
-      style={{
-        background: 'rgba(15,7,40,0.82)',
-        border: '1px solid rgba(167,139,250,0.3)',
-        animation: 'hr-notif-in 0.3s ease-out',
-      }}
-    >
-      <span className="text-base">🏃</span>
-      <span className="font-medium">{text}</span>
-    </div>
-  );
-}
-
+// ─── Achievement overlay ──────────────────────────────────────────────────────
 function AchievBanner({ title, desc, onDone }: { title: string; desc: string; onDone: () => void }) {
   useEffect(() => {
     const t = setTimeout(onDone, 4000);
@@ -1453,7 +1440,6 @@ function AchievBanner({ title, desc, onDone }: { title: string; desc: string; on
 export default function HackathonRush({ windowId: _windowId, onClose: _onClose }: AppWindowProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<GameEngine | null>(null);
-  const [notifs, setNotifs] = useState<NotifItem[]>([]);
   const [achievs, setAchievs] = useState<AchievementItem[]>([]);
   const [showTouchHint, setShowTouchHint] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -1476,7 +1462,6 @@ export default function HackathonRush({ windowId: _windowId, onClose: _onClose }
     engineRef.current = engine;
     engine.init(
       canvas,
-      (n) => setNotifs((prev) => [...prev.slice(-2), n]),
       (a) => setAchievs((prev) => [...prev.slice(-2), a]),
     );
 
@@ -1499,7 +1484,6 @@ export default function HackathonRush({ windowId: _windowId, onClose: _onClose }
     };
   }, []);
 
-  const dismissNotif = (id: number) => setNotifs((p) => p.filter((n) => n.id !== id));
   const dismissAchiev = (id: string) => setAchievs((p) => p.filter((a) => a.id !== id));
 
   return (
@@ -1545,14 +1529,8 @@ export default function HackathonRush({ windowId: _windowId, onClose: _onClose }
             </div>
           </div>
         )}
-        {/* macOS-style notification banners (top right) */}
-        <div className="absolute top-12 right-3 flex flex-col gap-2 pointer-events-none z-20">
-          {notifs.map((n) => (
-            <NotifBanner key={n.id} text={n.text} onDone={() => dismissNotif(n.id)} />
-          ))}
-        </div>
-        {/* Achievement banners (bottom right) */}
-        <div className="absolute bottom-4 right-3 flex flex-col gap-2 pointer-events-none z-20">
+        {/* Achievement banners (top) */}
+        <div className="absolute top-3 left-0 right-0 flex flex-col items-center gap-2 pointer-events-none z-20 px-3">
           {achievs.map((a) => (
             <AchievBanner key={a.id} title={a.title} desc={a.desc} onDone={() => dismissAchiev(a.id)} />
           ))}

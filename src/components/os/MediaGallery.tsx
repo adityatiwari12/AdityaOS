@@ -6,10 +6,11 @@ import { useReducedMotion } from '../../lib/reducedMotion';
 
 interface MediaGalleryProps {
   items: HackathonPhoto[];
+  initialIndex?: number;
 }
 
-export default function MediaGallery({ items }: MediaGalleryProps) {
-  const [active, setActive] = useState<number | null>(null);
+export default function MediaGallery({ items, initialIndex }: MediaGalleryProps) {
+  const [active, setActive] = useState<number | null>(initialIndex ?? null);
   const [errored, setErrored] = useState<Record<number, boolean>>({});
   const reduced = useReducedMotion();
   const swipeStartX = useRef(0);
