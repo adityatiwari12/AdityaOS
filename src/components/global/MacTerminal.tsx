@@ -126,6 +126,7 @@ export default function MacTerminal({ isOpen, onClose, introMode = false }: MacT
   // "yes" to booking a call. Lets us open the Calendly widget locally without
   // another (rate-limited) server round-trip.
   const awaitingCallRef = useRef(false);
+  const [dailyLimitHit, setDailyLimitHit] = useState(false);
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const googleHandlerRef = useRef<((resp: { credential?: string }) => void) | null>(null);
   const submitMessageRef = useRef<((raw: string) => void) | null>(null);
@@ -490,8 +491,8 @@ When an action fits, pair it with a short warm confirmation in "message". If a q
         }
 
         if (data.code === 'DAILY_LIMIT') {
-          // Arm the local "book a call" confirmation flow for the next reply.
           awaitingCallRef.current = true;
+          setDailyLimitHit(true);
         }
 
         const notice =
@@ -751,6 +752,14 @@ When an action fits, pair it with a short warm confirmation in "message". If a q
             </div>
           )}
         </div>
+
+        {/* Daily limit banner */}
+        {dailyLimitHit && (
+          <div className='mx-3 mb-2 px-3 py-2 rounded-xl flex items-center gap-2 text-xs font-medium' style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.25)', color: '#fca5a5' }}>
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" strokeWidth="1.2"/><line x1="6.5" y1="4" x2="6.5" y2="7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/><circle cx="6.5" cy="9" r="0.7" fill="currentColor"/></svg>
+            Daily limit reached — replies paused until midnight
+          </div>
+        )}
 
         {/* Composer */}
         <div className='px-3 pb-3 pt-1'>
