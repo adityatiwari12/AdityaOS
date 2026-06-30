@@ -191,7 +191,7 @@ export default function Camera() {
       {flash && <div className="absolute inset-0 bg-white pointer-events-none" />}
 
       {/* Brand watermark badge */}
-      {!error && (
+      {!error && !photo && (
         <div className="absolute bottom-3 right-3 flex items-center gap-1.5 pl-1.5 pr-2.5 py-1.5 rounded-full bg-black/45 backdrop-blur-sm pointer-events-none select-none">
           <img src="https://github.com/adityatiwari12.png" alt="" className="w-6 h-6 rounded-lg object-cover" />
           <div className="leading-tight">
