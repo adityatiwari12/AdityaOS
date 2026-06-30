@@ -31,19 +31,19 @@ function advance(step: number, title: string, body: string) {
 
 /** Show caption and wait for TTS to finish before resolving.
  *  Falls back to a timed hold when muted. */
-async function narrate(step: number, title: string, body: string, ctx: TourContext, mutedHoldMs = 4000) {
+async function narrate(step: number, title: string, body: string, ctx: TourContext, mutedHoldMs = 2700) {
   advance(step, title, body);
   if (useTourStore.getState().muted) {
     await delay(mutedHoldMs, ctx.cancel);
   } else {
     await speakAndWait(title + '. ' + body, ctx.cancel);
-    await delay(700, ctx.cancel);
+    await delay(450, ctx.cancel);
   }
 }
 
 async function openApp(appId: AppId, title: string, ctx: TourContext, payload?: WindowPayload) {
   useOSStore.getState().openWindow(appId, title, payload);
-  await delay(900, ctx.cancel);
+  await delay(600, ctx.cancel);
 }
 
 async function clickDockIcon(appId: AppId, ctx: TourContext) {
@@ -51,20 +51,20 @@ async function clickDockIcon(appId: AppId, ctx: TourContext) {
   if (el) {
     const r = el.getBoundingClientRect();
     await ctx.cursor.current?.click(r.left + r.width / 2, r.top + r.height / 2);
-    await delay(900, ctx.cancel);
+    await delay(600, ctx.cancel);
   } else {
     const reg = (await import('./appRegistry')).appRegistry.find((a) => a.id === appId);
     await openApp(appId, reg?.title ?? appId, ctx);
   }
 }
 
-async function hoverTourTarget(id: string, ctx: TourContext, holdMs = 3000) {
+async function hoverTourTarget(id: string, ctx: TourContext, holdMs = 2000) {
   const el = document.querySelector(`[data-tour-id="${id}"]`) as HTMLElement | null;
   if (!el) { await delay(holdMs, ctx.cancel); return; }
   el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  await delay(400, ctx.cancel);
+  await delay(250, ctx.cancel);
   const r = el.getBoundingClientRect();
-  await ctx.cursor.current?.moveTo(r.left + r.width / 2, r.top + Math.min(70, r.height / 2), 800);
+  await ctx.cursor.current?.moveTo(r.left + r.width / 2, r.top + Math.min(70, r.height / 2), 500);
   await delay(holdMs, ctx.cancel);
 }
 
@@ -72,7 +72,7 @@ async function scrollToTarget(selector: string, ctx: TourContext) {
   const el = document.querySelector(selector) as HTMLElement | null;
   if (!el) return;
   el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  await delay(400, ctx.cancel);
+  await delay(250, ctx.cancel);
 }
 
 /** Click the traffic-light Close on the topmost dialog window (not lightbox). */
@@ -86,13 +86,13 @@ async function closeTopWindow(ctx: TourContext) {
   if (!windowClose) return;
   const r = windowClose.getBoundingClientRect();
   await ctx.cursor.current?.click(r.left + r.width / 2, r.top + r.height / 2);
-  await delay(500, ctx.cancel);
+  await delay(330, ctx.cancel);
 }
 
-async function idleDrift(ctx: TourContext, durationMs = 2000) {
+async function idleDrift(ctx: TourContext, durationMs = 1300) {
   const cx = window.innerWidth / 2;
   const cy = window.innerHeight / 2 - 60;
-  await ctx.cursor.current?.moveTo(cx, cy, 1000);
+  await ctx.cursor.current?.moveTo(cx, cy, 650);
   await delay(durationMs, ctx.cancel);
 }
 
@@ -150,21 +150,21 @@ export async function runTourScript(ctx: TourContext) {
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
 
-    await ctx.cursor.current?.moveTo(cx - 250, cy - 120, 1000);
+    await ctx.cursor.current?.moveTo(cx - 250, cy - 120, 650);
     await narrate(2,
       "TalkWithDB — and yes, it actually works.",
       "You type a question in plain English. It generates the SQL, runs it against your database, and shows you live results. RAG, LLMs, FastAPI backend. Real users use this to query real production databases.",
-      ctx, 3500
+      ctx, 2300
     );
 
-    await ctx.cursor.current?.moveTo(cx + 250, cy + 80, 1000);
+    await ctx.cursor.current?.moveTo(cx + 250, cy + 80, 650);
     await narrate(2,
       "Sanjivani — AI for healthcare.",
       "An AI diagnostic assistant that reads medical records using OCR, Named Entity Recognition, and deep learning. He built this for a national hackathon and then pitched it to actual hospitals. Not as a demo — as something they could actually deploy.",
-      ctx, 3500
+      ctx, 2300
     );
 
-    await ctx.cursor.current?.moveTo(cx - 80, cy + 200, 800);
+    await ctx.cursor.current?.moveTo(cx - 80, cy + 200, 530);
     await narrate(2,
       "There's a pattern here.",
       "Every project has a real user, a real problem, and real code behind it. Not just GitHub repos that compile once. These are things people actually use.",
@@ -203,7 +203,7 @@ export async function runTourScript(ctx: TourContext) {
       ctx, 3000
     );
     await openApp('photos', 'Photos', ctx, { photoIndex: 1 });
-    await delay(1000, ctx.cancel);
+    await delay(650, ctx.cancel);
 
     // Track which photo is currently visible so we click Next the right number of times
     let photoIdx = 1;
@@ -215,11 +215,11 @@ export async function runTourScript(ctx: TourContext) {
         if (!nextBtn) break;
         const nr = nextBtn.getBoundingClientRect();
         await ctx.cursor.current?.click(nr.left + nr.width / 2, nr.top + nr.height / 2);
-        await delay(500, ctx.cancel);
+        await delay(330, ctx.cancel);
       }
       photoIdx = targetIndex;
-      await delay(300, ctx.cancel);
-      await narrate(4, title, body, ctx, 4500);
+      await delay(200, ctx.cancel);
+      await narrate(4, title, body, ctx, 3000);
     }
 
     // Photo index 1 — thinktank-win (lightbox already open at this photo)
@@ -269,7 +269,7 @@ export async function runTourScript(ctx: TourContext) {
     if (closeLightbox) {
       const lr = closeLightbox.getBoundingClientRect();
       await ctx.cursor.current?.click(lr.left + lr.width / 2, lr.top + lr.height / 2);
-      await delay(500, ctx.cancel);
+      await delay(330, ctx.cancel);
     }
     await closeTopWindow(ctx);
 
@@ -280,7 +280,7 @@ export async function runTourScript(ctx: TourContext) {
       ctx, 2500
     );
     await openApp('notes', 'Notes', ctx, { section: 'competitions' });
-    await delay(600, ctx.cancel);
+    await delay(400, ctx.cancel);
 
     await hoverTourTarget('notes-competitions-card', ctx, 600);
     await narrate(5,
@@ -292,11 +292,11 @@ export async function runTourScript(ctx: TourContext) {
     const notesEl = document.querySelector('[data-tour-id="notes-competitions-card"]');
     if (notesEl) {
       const r = notesEl.getBoundingClientRect();
-      await ctx.cursor.current?.moveTo(r.left + r.width / 2, r.bottom + 120, 900);
+      await ctx.cursor.current?.moveTo(r.left + r.width / 2, r.bottom + 120, 600);
       await narrate(5,
         "It's not luck. It's a pattern.",
         "Every few months, there's a new one. He walks into rooms with the hardest problems, and he figures out a way to solve them faster and better than everyone else. That doesn't happen by accident.",
-        ctx, 3500
+        ctx, 2300
       );
     }
     await closeTopWindow(ctx);
@@ -305,26 +305,26 @@ export async function runTourScript(ctx: TourContext) {
     await narrate(6,
       "Okay — one more thing, and I promise this one's fun.",
       "He built a game. An actual game. Between competitions.",
-      ctx, 2500
+      ctx, 1700
     );
     await openApp('hackathon-rush', 'Jumping Game', ctx);
-    await delay(1000, ctx.cancel);
+    await delay(650, ctx.cancel);
 
     const canvas = document.querySelector('[data-tour-id="hackathon-canvas"]') as HTMLElement | null;
     if (canvas) {
       const cr = canvas.getBoundingClientRect();
-      await ctx.cursor.current?.moveTo(cr.left + cr.width / 2, cr.top + cr.height / 2, 800);
+      await ctx.cursor.current?.moveTo(cr.left + cr.width / 2, cr.top + cr.height / 2, 530);
     }
     await narrate(6,
       "Hackathon Rush. Built entirely from scratch.",
       "Canvas rendering, custom physics engine, sprite animation, collision detection — all in TypeScript. No game engine. No library. Just code. He built this for fun, in the gaps between everything else you just saw.",
-      ctx, 3500
+      ctx, 2300
     );
     for (let i = 0; i < 8; i++) {
       window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space', key: ' ', bubbles: true }));
       await delay(80, ctx.cancel);
       window.dispatchEvent(new KeyboardEvent('keyup', { code: 'Space', key: ' ', bubbles: true }));
-      await delay(1300, ctx.cancel);
+      await delay(870, ctx.cancel);
     }
     await closeTopWindow(ctx);
 
@@ -332,21 +332,21 @@ export async function runTourScript(ctx: TourContext) {
     await narrate(7,
       "And if you want everything on one page —",
       "Here's the resume. Every role, every project, every publication. If you want to download it, there's a button waiting for you on the next screen.",
-      ctx, 3500
+      ctx, 2300
     );
     await openApp('resume', 'Resume', ctx);
-    await delay(3500, ctx.cancel);
+    await delay(2300, ctx.cancel);
     await closeTopWindow(ctx);
 
     // ── Step 8: Final ────────────────────────────────────────────────────────
     await narrate(8,
       "That's the tour. And honestly — I'm proud of this one.",
       "A startup, original research, government grants, national wins, international finals, and a game built for fun. Aditya's looking for the next big challenge. If you're building something that deserves that — reach out.",
-      ctx, 4000
+      ctx, 2700
     );
     const store = useOSStore.getState();
     store.windows.forEach((w) => store.closeWindow(w.id));
-    await delay(800, ctx.cancel);
+    await delay(530, ctx.cancel);
     useTourStore.getState()._finish();
 
   } catch (e: unknown) {

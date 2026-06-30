@@ -11,7 +11,7 @@ function browserTTSFallback(text: string): Promise<void> {
     window.speechSynthesis.cancel();
     const voices = window.speechSynthesis.getVoices();
     const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 0.92; utter.pitch = 0.9; utter.volume = 1;
+    utter.rate = 1.38; utter.pitch = 0.9; utter.volume = 1;
     const preferred = ['Google UK English Male', 'Microsoft David', 'Daniel', 'Google US English'];
     for (const name of preferred) {
       const v = voices.find((v) => v.name.includes(name));
