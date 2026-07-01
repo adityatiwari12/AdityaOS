@@ -748,7 +748,10 @@ When an action fits, pair it with a short warm confirmation in "message". If a q
                           } else {
                             stopAudio();
                             setSpeakingIndex(index);
-                            await speakAndWait(msg.content);
+                            const clean = msg.content
+                              .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '')
+                              .replace(/\s+/g, ' ').trim();
+                            await speakAndWait(clean);
                             setSpeakingIndex(null);
                           }
                         }}
