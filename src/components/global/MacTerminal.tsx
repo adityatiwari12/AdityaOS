@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { IoArrowUp } from 'react-icons/io5';
+import { BsVolumeUpFill, BsVolumeMuteFill, BsStopCircleFill } from 'react-icons/bs';
+import { speakAndWait, stopAudio } from '../../lib/tts';
 import { userConfig } from '../../config/index';
 import { useOSStore } from '../../stores/osStore';
 import { handleEasterEgg } from '../../lib/easterEggs';
@@ -104,6 +106,7 @@ export default function MacTerminal({ isOpen, onClose, introMode = false }: MacT
   const [placeholder, setPlaceholder] = useState('');
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastAiMsgRef = useRef<HTMLDivElement>(null);
   const prevMsgCount = useRef(0);
@@ -737,6 +740,25 @@ When an action fits, pair it with a short warm confirmation in "message". If a q
                         {msg.content}
                       </ReactMarkdown>
                       <Media kind={msg.media} />
+                      <button
+                        onClick={async () => {
+                          if (speakingIndex === index) {
+                            stopAudio();
+                            setSpeakingIndex(null);
+                          } else {
+                            stopAudio();
+                            setSpeakingIndex(index);
+                            await speakAndWait(msg.content);
+                            setSpeakingIndex(null);
+                          }
+                        }}
+                        className='mt-1.5 flex items-center gap-1 text-[11px] text-white/30 hover:text-white/60 transition-colors'
+                        aria-label={speakingIndex === index ? 'Stop speaking' : 'Read aloud'}
+                      >
+                        {speakingIndex === index
+                          ? <BsStopCircleFill size={12} className='text-emerald-400' />
+                          : <BsVolumeUpFill size={12} />}
+                      </button>
                     </div>
                   </div>
                 );
