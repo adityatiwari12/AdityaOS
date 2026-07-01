@@ -26,7 +26,7 @@ export const POST: APIRoute = async ({ request }) => {
       body: JSON.stringify({
         inputs: [text],
         target_language_code: 'en-IN',
-        speaker: 'aryan',
+        speaker: 'amartya',
         model: 'bulbul:v2',
         pitch: 0,
         pace: 1.4,
