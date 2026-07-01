@@ -308,7 +308,7 @@ const GitHubViewer = ({ isOpen, onClose, selectedProjectId }: GitHubViewerProps)
     </DraggableWindow>
 
     {quickLook && (
-      <div className="fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-label="Quick Look">
+      <div className="fixed inset-0 z-[9000]" role="dialog" aria-modal="true" aria-label="Quick Look">
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setQuickLook(null)} />
         <div className="relative mx-auto mt-16 w-[92%] max-w-3xl rounded-xl border border-white/10 bg-gray-900/95 shadow-2xl">
           <div className="p-4 md:p-6">
