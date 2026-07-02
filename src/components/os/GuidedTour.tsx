@@ -41,7 +41,7 @@ function FinalCTAOverlay() {
 
         <div className="flex gap-3 w-full">
           <button
-            onClick={() => window.open(emailHref, '_blank')}
+            onClick={() => { window.location.href = emailHref; }}
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition-all text-white text-sm font-semibold"
           >
             <BsEnvelopeFill size={14} />
