@@ -40,13 +40,13 @@ function FinalCTAOverlay() {
         </div>
 
         <div className="flex gap-3 w-full">
-          <a
-            href={emailHref}
+          <button
+            onClick={() => window.open(emailHref, '_blank')}
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition-all text-white text-sm font-semibold"
           >
             <BsEnvelopeFill size={14} />
             Email Aditya
-          </a>
+          </button>
           <a
             href="/resume.pdf"
             download="Aditya_Tiwari_Resume.pdf"
