@@ -115,7 +115,8 @@ export default function Desktop({ initialBg, backgroundMap }: AppLayoutProps) {
       openWindow('intro', 'Intro');
       return;
     }
-    openWindow('terminal', 'AI Copilot');
+    const hasDeepLink = new URLSearchParams(window.location.search).has('open');
+    if (!hasDeepLink) openWindow('terminal', 'AI Copilot');
   }, [booted, openWindow]);
 
   // Deep link: ?open=<appId> opens that app after boot
