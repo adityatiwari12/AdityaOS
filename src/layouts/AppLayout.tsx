@@ -118,6 +118,19 @@ export default function Desktop({ initialBg, backgroundMap }: AppLayoutProps) {
     openWindow('terminal', 'AI Copilot');
   }, [booted, openWindow]);
 
+  // Deep link: ?open=<appId> opens that app after boot
+  useEffect(() => {
+    if (!booted) return;
+    const params = new URLSearchParams(window.location.search);
+    const appId = params.get('open');
+    if (!appId) return;
+    const def = getAppDefinition(appId as never);
+    if (def) {
+      openWindow(appId as never, def.title);
+      history.replaceState(null, '', window.location.pathname);
+    }
+  }, [booted, openWindow]);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const isMac = navigator.platform.toUpperCase().includes('MAC');
