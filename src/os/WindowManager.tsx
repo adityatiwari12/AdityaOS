@@ -20,7 +20,7 @@ export default function WindowManager() {
         const Component = def.component;
 
         if (def.legacyWindow) {
-          return (
+          const inner = (
             <AppErrorBoundary key={win.id} appTitle={win.title || def.title}>
               <Suspense fallback={null}>
                 <Component
@@ -31,6 +31,11 @@ export default function WindowManager() {
               </Suspense>
             </AppErrorBoundary>
           );
+          return win.openFullscreen ? (
+            <div key={win.id} style={{ position: 'fixed', inset: 0, top: 36, zIndex: 280 + win.zIndex }}>
+              {inner}
+            </div>
+          ) : inner;
         }
 
         return (

@@ -28,7 +28,7 @@ export default function OSWindow({ windowState, title, children }: OSWindowProps
   const dragControls = useDragControls();
   const prevGeom = useRef<{ position: { x: number; y: number }; size: { width: number; height: number } } | null>(null);
   const swipeStartY = useRef(0);
-  const [zoomed, setZoomed] = useState(false);
+  const [zoomed, setZoomed] = useState(!!windowState.openFullscreen);
   const [isMobile, setIsMobile] = useState(false);
   // Mobile-only visibility states so we can play exit animation before unmounting.
   const [mobileVisible, setMobileVisible] = useState(!minimized);

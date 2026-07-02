@@ -54,6 +54,7 @@ export interface WindowState {
   focused: boolean;
   payload?: WindowPayload;
   className?: string;
+  openFullscreen?: boolean;
 }
 
 export type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night';

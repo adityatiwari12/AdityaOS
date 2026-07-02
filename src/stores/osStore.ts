@@ -126,6 +126,7 @@ interface OSStore {
   restoreWindow: (id: string) => void;
   updateWindowPosition: (id: string, position: { x: number; y: number }) => void;
   updateWindowSize: (id: string, size: { width: number; height: number }) => void;
+  expandWindow: (id: string) => void;
   isAppOpen: (appId: AppId) => boolean;
   getFocusedWindow: () => WindowState | undefined;
   executeCopilotActions: (actions: Array<{ type: string; appId?: AppId; payload?: WindowPayload; targetId?: string }>) => void;
@@ -251,6 +252,20 @@ export const useOSStore = create<OSStore>((set, get) => ({
   updateWindowSize: (id, size) =>
     set((s) => ({
       windows: s.windows.map((w) => (w.id === id ? { ...w, size } : w)),
+    })),
+
+  expandWindow: (id) =>
+    set((s) => ({
+      windows: s.windows.map((w) =>
+        w.id === id
+          ? {
+              ...w,
+              openFullscreen: true,
+              position: { x: 0, y: 36 },
+              size: { width: window.innerWidth, height: window.innerHeight - 36 },
+            }
+          : w
+      ),
     })),
 
   isAppOpen: (appId) => get().windows.some((w) => w.appId === appId && !w.minimized),

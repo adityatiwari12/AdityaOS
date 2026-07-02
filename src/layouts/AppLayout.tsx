@@ -119,7 +119,7 @@ export default function Desktop({ initialBg, backgroundMap }: AppLayoutProps) {
     if (!hasDeepLink) openWindow('terminal', 'AI Copilot');
   }, [booted, openWindow]);
 
-  // Deep link: ?open=<appId> opens that app after boot
+  // Deep link: ?open=<appId> opens that app fullscreen after boot
   useEffect(() => {
     if (!booted) return;
     const params = new URLSearchParams(window.location.search);
@@ -127,7 +127,8 @@ export default function Desktop({ initialBg, backgroundMap }: AppLayoutProps) {
     if (!appId) return;
     const def = getAppDefinition(appId as never);
     if (def) {
-      openWindow(appId as never, def.title);
+      const winId = openWindow(appId as never, def.title);
+      useOSStore.getState().expandWindow(winId);
       history.replaceState(null, '', window.location.pathname);
     }
   }, [booted, openWindow]);
